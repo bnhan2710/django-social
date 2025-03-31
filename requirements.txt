@@ -1,0 +1,31 @@
+# Web Framework
+Django==4.2.7
+
+# Image Processing
+Pillow==10.1.0
+
+# Form Handling and Authentication
+django-crispy-forms==2.0
+django-allauth==0.58.2
+
+# Environment and Configuration
+django-environ==0.11.2
+python-decouple==3.8
+
+# Static Files and Deployment
+whitenoise==6.6.0
+gunicorn==21.2.0
+
+# Development Tools
+django-debug-toolbar==4.2.0
+
+# API Requests
+requests==2.31.0
+
+# File Storage
+django-storages==1.14.2
+
+# Database Connectivity
+# Note: psycopg2-binary is included for potential future PostgreSQL migration
+# Currently using SQLite (built into Django)
+dj-database-url==2.1.0

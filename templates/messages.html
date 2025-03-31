@@ -1,0 +1,91 @@
+<!------- messages ------->
+{% load static %}
+<div id="receiver" receiver-id="{{receiver.id}}" thread-id="{{thread.id}}"></div>
+{% for chat in thread.messages.all %}
+{% if chat.user == user %}
+<!-- <div class="d-flex mb-4 replied">
+    <div class="msg_cotainer_send">
+        {{ chat.message }}
+        <span class="msg_time_send">{{ chat.timestamp|date:"d D" }},
+            {{ chat.timestamp|time:"H:i" }}</span>
+    </div>
+    <div class="img_cont_msg">
+        <img src="#" class="rounded-circle user_img_msg">
+    </div>
+</div> -->
+<div class="outgoing_msg">
+    <div class="sent_msg">
+        <p>{{ chat.message }}</p>
+        <span class="time_date">{{ chat.timestamp|date:"d D" }},
+            {{ chat.timestamp|time:"H:i"}}</span>
+    </div>
+</div>
+{% else %}
+<!-- <div class="d-flex mb-4 received">
+    <div class="img_cont_msg">
+        <img src="#" class="rounded-circle user_img_msg">
+    </div>
+    <div class="msg_cotainer">
+        {{ chat.message }}
+        <span class="msg_time">{{ chat.timestamp|date:"d D" }},
+            {{ chat.timestamp|time:"H:i"}}</span>
+    </div>
+</div> -->
+<div class="incoming_msg">
+    <div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil"> </div>
+    <div class="received_msg">
+        <div class="received_withd_msg">
+            <p>{{ chat.message }}</p>
+            <span class="time_date">{{ chat.timestamp|date:"d D" }},
+                {{ chat.timestamp|time:"H:i" }}</span>
+        </div>
+    </div>
+</div>
+
+{% endif %}
+{% endfor %}
+<!------- messages ------->
+<script src="{% static 'js/messages.js' %}"></script>
+<script>
+    function newMessage(message, sent_from, thread_id) {
+        if ($.trim(message) === '') {
+            return false;
+        }
+        let message_element;
+        const profile_pic = `/images/${sent_from['profile_pic']}`
+        const username = sent_from['username']
+        const content = message['content']
+        const timestamp = message['timestamp']
+        if (sent_from['id'] == '{{ user.id }}') {
+            message_element =
+                `
+            <div class="outgoing_msg">
+                <div class="sent_msg">
+                    <p>${content}</p>
+                    <span class="time_date">${timestamp}</span>
+                </div>
+            </div>
+            
+        `
+        } else {
+            message_element =
+                `
+            <div class="incoming_msg">
+                <div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil"> </div>
+                <div class="received_msg">
+                    <div class="received_withd_msg">
+                        <p>${content}</p>
+                        <span class="time_date">${timestamp}</span>
+                    </div>
+                </div>
+            </div>
+        `
+        }
+
+        $('.chat-messages').append($(message_element))
+        $('.chat-messages').animate({
+            scrollTop: $('.chat-messages').prop("scrollHeight")
+        }, 100)
+        $('#input-message').val('')
+    }
+</script>

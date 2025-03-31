@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block content %}
+<div class="post my-5">
+    <div class="card" style="margin:auto ; width:800px;">
+        <div class="card-body">
+            <div class="container">
+                <!-- Author -->
+                <div class="row">
+                    <div class="col-md-8 ">
+                        <div class="d-flex story ">
+                            <img src="{{user_profile.profile_pic.url}}" class="rounded-circle" height="40" width="40"
+                                alt="Avatar" />
+                            <div class="mt-2 mx-2">
+                                <a href="/profile/{{user_profile.user}}" class="text-dark">
+                                    <strong class="">@{{post.user}}</strong>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 ">
+                        <div class="d-flex float-end">
+                            <div class="dropdown">
+                                <a class="text-reset me-3 dropdown-toggle hidden-arrow" href="#"
+                                    id="navbarDropdownMenuLink" role="button" data-mdb-toggle="dropdown"
+                                    aria-expanded="false">
+                                    <i class="fas fa-ellipsis-h mt-3"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'delete_event' post.id %}">Delete</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Photos -->
+        <div class="bg-image hover-overlay ripple shadow-1-strong rounded-0" data-ripple-color="light">
+            <img src="{{post.image.url}}" class="w-100" />
+            <audio controls style="width: -webkit-fill-available;">
+                <source src="{{post.music.url}}" type="audio/mp3">
+            </audio>
+        </div>
+
+        <!-- Interaction -->
+        <div class="card-body">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-8">
+                        <a id="like{{post.id}}" data-catid="{{post.id}}" class="like-button">
+                            <i class="far fa-heart fa-lg ml-0"></i>
+                        </a>
+                        <i class="far fa-comment fa-lg mx-3"></i>
+                        <i class="far fa-paper-plane fa-lg"></i>
+                    </div>
+                </div>
+                <!-- Liked by -->
+                <div class="row mt-1">
+                    <div class="col-md-8 mt-1">
+                        {% if post.no_of_likes == 0 %}
+                        <small class="like-mess"> No likes yet</small>
+                        {% elif post.no_of_likes == 1 %}
+                        <small class="like-mess"> Liked by <strong>{{post.no_of_likes}}</strong>
+                            person</small>
+                        {% else %}
+                        <small class="like-mess"> Liked by <strong>{{post.no_of_likes}}</strong>
+                            people</small>
+                        {% endif %}
+                    </div>
+                </div>
+                <!-- Description -->
+                <div class="row">
+                    <div class="col-md-12 mt-1">
+                        <p class="mb-0">
+                            <small>{{post.caption}}
+                            </small>
+                        </p>
+                    </div>
+                </div>
+                <!-- Comments -->
+                <div class="row">
+                    {% for comment in post.comments.all %}
+                    <small>
+                        <p class="my-1"><strong class="text-dark">{{comment.user}}</strong> {{comment.comment}}</p>
+                    </small>
+                    <small style="color: #8E8E8E;">{{comment.created_at}}</small>
+
+                    {% endfor %}
+                </div>
+
+                <!-- Comment form -->
+                <div class="row">
+                    <form method="post" action="">
+                        {% csrf_token %}
+                        <hr />
+                        <div class="col-md-11">
+                            <div class="form-outline">
+                                <input type="text" name="comment" id="form12" class="form-control"
+                                    placeholder="Leave a comment..." />
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <input type="submit" class="text-info mt-1 text-end" value="Post">
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+
+<script type="text/javascript">
+    $('.like-button').click(function () {
+        var catid;
+        catid = $(this).attr("data-catid");
+        $.ajax(
+            {
+                type: "GET",
+                url: "/like-post",
+                data: {
+                    post_id: catid
+                },
+                success: function (data) {
+                    if (data == 0) {
+                        $('.like-mess').text("No likes");
+                    }
+                    else if (data == 1) {
+                        $('.like-mess').text("Liked by " + data + " person");
+                    }
+                    else {
+                        $('.like-mess').text("Liked by " + data + " people");
+                    }
+
+                }
+            })
+
+    });
+</script>
+{% endblock %}

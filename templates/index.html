@@ -1,0 +1,558 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <title>Music Social Media</title>
+    <!-- MDB icon -->
+    <link rel="icon" href="{% static 'assets/images/soundcloud.png' %}" type="image/png" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <!-- Google Fonts Roboto -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" />
+    <!-- MDB -->
+    <link rel="stylesheet" href="{% static 'assets/css/mdb.min.css' %}" />
+
+    <!-- Your custom styles (optional) -->
+    <style>
+        body {
+            background-color: #fafafa;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1;
+        }
+
+        #story {
+            background-color: #fff;
+            margin: auto;
+            border: 1px solid #dbdbdb;
+            height: 110px;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .story {
+            border-radius: 50%;
+        }
+
+        .story-container ul {
+            list-style-type: none;
+            display: flex;
+            overflow-y: auto;
+            padding: 20px;
+
+        }
+
+        .story-container ul li {
+            padding: 0 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .story-container ul li .story {
+            padding: 2px;
+            background: linear-gradient(45deg,
+                    #f09433 0%,
+                    #e6683c 25%,
+                    #dc2743 50%,
+                    #cc2366 75%,
+                    #bc1888 100%);
+        }
+
+        main {
+            margin-top: 100px;
+        }
+
+        .row {
+            --mdb-gutter-x: -0.5rem;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+
+        .user-followed {
+            font-size: 12px;
+            color: #8E8E8E
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .modal-backdrop {
+            z-index: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Start your project here-->
+    <header>
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <!-- Container wrapper -->
+            <div class="container-fluid">
+                <!-- Toggle button -->
+                <button class="navbar-toggler" type="button" data-mdb-toggle="collapse"
+                    data-mdb-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <!-- Collapsible wrapper -->
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <div class="container ">
+                        <div class="row">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-5">
+                                <a class="navbar-brand" href="/">
+                                    <img src="https://banner2.cleanpng.com/20190418/wfj/kisspng-logo-photography-music-image-soundcloud-soundcloud-logo-svg-png-icon-free-download-4-963-5cb945e4bd62b7.7101502515556459247757.jpg"
+                                        height="30" alt="Ins Logo" loading="lazy" />
+                                </a>
+                            </div>
+                            <div class="col-md-2">
+                                <form action="/search" method="POST" class="d-flex input-group w-auto">
+                                    {% csrf_token %}
+                                    <button class="btn btn-dark" type="submit" style="margin-right:5px;"><i
+                                            class="fas fa-search"></i></button>&nbsp;&nbsp;
+                                    <input type="text" name="username" class="form-control rounded" placeholder="Search"
+                                        aria-label="Search" aria-describedby="search-addon" />
+
+                                </form>
+                            </div>
+                            <div class="col-md-3">
+                                <ul class="navbar-nav justify-content-center ">
+                                    <!-- Icons -->
+                                    <li class="nav-item me-3 me-lg-0">
+                                        <a class="nav-link" href="#">
+                                            <i class="fas fa-home fa-lg text-dark"></i>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item me-3 me-lg-0">
+                                        <a class="nav-link" href="messages">
+                                            <i class="fab fa-facebook-messenger fa-lg text-dark"></i>
+                                        </a>
+                                    </li>
+                                    <!-- Upload files dropdown -->
+                                    <li class="nav-item me-3 me-lg-0">
+
+                                        <!-- Button trigger modal -->
+                                        <a class="nav-link" style="cursor: pointer;" data-mdb-toggle="modal"
+                                            data-mdb-target="#exampleModal">
+                                            <i class="far fa-plus-square fa-lg text-dark"></i>
+                                        </a>
+
+                                        <!-- Modal -->
+                                        <div class="modal fade" id="exampleModal" tabindex="-1"
+                                            aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <form method="post" action="upload" enctype="multipart/form-data">
+                                                        {% csrf_token %}
+                                                        <div class="modal-header text-center">
+                                                            <h5 class="modal-title" id="exampleModalLabel">Create New
+                                                                Post
+                                                            </h5>
+                                                            <button type="button" class="btn-close"
+                                                                data-mdb-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+
+                                                            <input type="file" name="image_upload"><br><br>
+                                                            <input type="file" name="music_upload"><br><br>
+                                                            <textarea class="button soft-warning small" name="caption"
+                                                                placeholder="Caption..."></textarea>
+
+
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary"
+                                                                    data-mdb-dismiss="modal">Close</button>
+                                                                <button type="submit" class="btn btn-primary">Save
+                                                                    changes</button>
+                                                            </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </li>
+                                    <!-- Avatar dropdown -->
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle d-flex align-items-center"
+                                            style="cursor: pointer;" id="navbarDropdownMenuLink" role="button"
+                                            data-mdb-toggle="dropdown" aria-expanded="false">
+                                            <img src="{{user_profile.profile_pic.url}}" width="25"
+                                                class="rounded-circle" height="25" alt="Portrait of a Woman" />
+                                        </a>
+                                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                            <li>
+                                                <a class="dropdown-item" href="profile/{{request.user.username}}">My
+                                                    profile</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="settings">Settings</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="logout">Logout</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Collapsible wrapper -->
+
+                <!-- Right elements -->
+                <div class="d-flex align-items-center">
+                    <!-- Icon -->
+
+                    <!-- Notifications -->
+
+                    <!-- Avatar -->
+
+                </div>
+                <!-- Right elements -->
+            </div>
+            <!-- Container wrapper -->
+        </nav>
+
+        <!-- Navbar -->
+    </header>
+
+    <main>
+        <div class="container my-5">
+            <div class="row">
+                <div class="col-md-1"></div>
+                <div class="col-md-7">
+                    <!-- <section class="story-container" id="story">
+                        <ul>
+                            <li>
+                                <div class="story">
+                                    <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img (31).webp"
+                                        class="rounded-circle" height="50" alt="Portrait of a Woman" />
+                                </div>
+                                <span>tinhuynh_73</span>
+                            </li>
+                            <li>
+                                <div class="story">
+                                    <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img (32).webp"
+                                        class="rounded-circle" height="50" alt="Portrait of a Woman" />
+                                </div>
+                                <span>tinhuynh_73</span>
+                            </li>
+                            <li>
+                                <div class="story">
+                                    <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img (33).webp"
+                                        class="rounded-circle" height="50" alt="Portrait of a Woman" />
+                                </div>
+                                <span>tinhuynh_73</span>
+                            </li>
+                            <li>
+                                <div class="story">
+                                    <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img (30).webp"
+                                        class="rounded-circle" height="50" alt="Portrait of a Woman" />
+                                </div>
+                                <span>tinhuynh_73</span>
+                            </li>
+                            <li>
+                                <div class="story">
+                                    <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img (29).webp"
+                                        class="rounded-circle" height="50" alt="Portrait of a Woman" />
+                                </div>
+                                <span>tinhuynh_73</span>
+                            </li>
+                            <li>
+                                <div class="story">
+                                    <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img (28).webp"
+                                        class="rounded-circle" height="50" alt="Portrait of a Woman" />
+                                </div>
+                                <span>tinhuynh_73</span>
+                            </li>
+                            <li>
+                                <div class="story">
+                                    <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img (26).webp"
+                                        class="rounded-circle" height="50" alt="Portrait of a Woman" />
+                                </div>
+                                <span>tinhuynh_73</span>
+                            </li>
+                            <li>
+                                <div class="story">
+                                    <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img (26).webp"
+                                        class="rounded-circle" height="50" alt="Portrait of a Woman" />
+                                </div>
+                                <span>tinhuynh_73</span>
+                            </li>
+                        </ul>
+                    </section> -->
+                    <section class="newsfeed">
+                        {% for post in posts%}
+                        <div class="post my-5">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="container">
+                                        <!-- Author -->
+                                        <div class="row">
+                                            <div class="col-md-8 ">
+                                                <div class="d-flex story ">
+                                                    <img src="{{post.img}}" class="rounded-circle" height="40"
+                                                        width="40" alt="Avatar" />
+                                                    <div class="mt-2 mx-2">
+                                                        <a href="/profile/{{post.user}}" class="text-dark">
+                                                            <strong class="">@{{post.user}}</strong>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 ">
+                                                <div class="d-flex float-end">
+                                                    <div class="dropdown">
+                                                        {% if request.user.username == post.user %}
+                                                        <a class="text-reset me-3 dropdown-toggle hidden-arrow" href="#"
+                                                            id="navbarDropdownMenuLink" role="button"
+                                                            data-mdb-toggle="dropdown" aria-expanded="false">
+                                                            <i class="fas fa-ellipsis-h mt-3"></i>
+                                                        </a>
+                                                        <!-- <div class="dropdown-menu dropdown-menu-right"
+                                                            aria-labelledby="navbarDropdownMenuLink">
+                                                            <a class="dropdown-item" href="/edit/{{post.id}}">Edit</a>
+                                                            <a class="dropdown-item"
+                                                                href="/delete/{{post.id}}">Delete</a>
+                                                        </div> -->
+                                                        <ul class="dropdown-menu dropdown-menu-end"
+                                                            aria-labelledby="navbarDropdownMenuLink">
+                                                            <li>
+                                                                <a class="dropdown-item"
+                                                                    href="{% url 'delete_event' post.id %}">Delete</a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item" href="#">Another news</a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item" href="#">Something else
+                                                                    here</a>
+                                                            </li>
+                                                        </ul>
+                                                        {% else %}
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Photos -->
+                                <a href="/post/{{post.id}}"
+                                    class="bg-image hover-overlay ripple shadow-1-strong rounded-0"
+                                    data-ripple-color="light">
+{#                                    <img src="{{post.image.url}}" class="w-100" />#}
+{#                                    <audio controls style="width: -webkit-fill-available;">#}
+{#                                        <source src="{{post.music.url}}" type="audio/mp3">#}
+{#                                    </audio>#}
+                                </a>
+
+                                <!-- Interaction -->
+                                <div class="card-body">
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <a id="like{{post.id}}" data-catid="{{post.id}}" class="like-button">
+                                                    <i class="far fa-heart fa-lg ml-0"></i>
+                                                </a>
+                                                <i class="far fa-comment fa-lg mx-3"></i>
+                                                <i class="far fa-paper-plane fa-lg"></i>
+                                            </div>
+                                            <div class="col-md-4 text-end">
+                                                <i class="far fa-bookmark fa-lg "></i>
+                                            </div>
+                                        </div>
+                                        <!-- Liked by -->
+                                        <div class="row mt-1">
+                                            <div class="col-md-8 mt-1">
+                                                {% if post.no_of_likes == 0 %}
+                                                <small class="like-mess"> No likes yet</small>
+                                                {% elif post.no_of_likes == 1 %}
+                                                <small class="like-mess"> Liked by <strong>{{post.no_of_likes}}</strong>
+                                                    person</small>
+                                                {% else %}
+                                                <small class="like-mess"> Liked by <strong>{{post.no_of_likes}}</strong>
+                                                    people</small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <!-- Description -->
+                                        <div class="row">
+                                            <div class="col-md-12 mt-1">
+                                                <p class="mb-0">
+                                                    <small style="font-size:medium"><b>{{post.caption}}</b>
+                                                    </small>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <!-- Comments -->
+                                        <small class="my-1" style="color: #8E8E8E; margin-left: 4px;"><a
+                                                href="/post/{{post.id}}" class="text-dark">
+                                                {{post.count_comments}}
+                                                Comments
+                                            </a></small>
+                                        {% for comment in post.post_comments %}
+                                        <div class="row">
+                                            <small>
+                                                <p class="my-1"><strong class="text-dark">{{comment.user}}</strong>
+                                                    {{comment.comment}}</p>
+                                                <small style="color: #8E8E8E;">{{comment.created_at}}</small>
+                                            </small>
+
+                                        </div>
+                                        {% endfor %}
+
+                                        <!-- Comment form -->
+                                        <!-- <div class="row">
+                                            <hr />
+                                            <div class="col-md-11">
+                                                <div class="form-outline">
+                                                    <input type="text" id="form12" class="form-control"
+                                                        placeholder="Leave a comment..." />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-1">
+                                                <p class="text-info mt-1 text-end">Post</p>
+                                            </div>
+                                        </div> -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </section>
+                </div>
+                <div class="col-md-3 mx-4 d-md-none d-lg-block">
+                    <section class="mt-3">
+                        <!-- User -->
+                        <div class="row">
+                            <div class="col-md-3">
+                                <img src="{{user_profile.profile_pic.url}}" class="rounded-circle" height="60"
+                                    width="60" alt="Avatar" />
+                            </div>
+                            <div class="col-md-9">
+                                <ul class="ml-0 pl-1 mt-1 list-unstyled">
+                                    <li>
+                                        <p class="ml-3 text-dark mb-0 mt-1">
+                                            <strong>{{request.user.username}}</strong>
+                                        </p>
+                                    </li>
+                                    <li>
+                                        <span class="ml-3 text-dark">{{user_profile.bio}}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Suggestions -->
+                        <div style="margin-top:20px">
+                            <small style=" color:#8E8E8E"> <strong>Suggestion for you</strong> </small>
+                            <span class="float-end">See All</span>
+                        </div>
+
+                        <!-- Suggested users -->
+                        {% for suggestion in usersuggest_profile_list %}
+                        <div class="row">
+                            <div class="col-md-2 mt-3">
+                                <a href="profile/{{suggestion.user}}">
+                                    <img src="{{suggestion.profile_pic.url}}" class="rounded-circle " height="35"
+                                        width="35" alt="Avatar" />
+                                </a>
+                            </div>
+                            <div class="col-md-8 mt-1">
+                                <ul class="ml-0 pl-1 mt-1 list-unstyled">
+                                    <li>
+                                        <small class="user-name">{{suggestion.user}}</small>
+                                    </li>
+                                    <li>
+                                        <span class="user-followed">Followed by {{suggestion.followers}}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-2 mt-3">
+                                <!-- <form action="/follow" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" value="{{user.username}}" name="follower" />
+                                    <input type="hidden" value="{{user_object.username}}" name="user" />
+                                    {% if user_object.username == request.user.username %}
+                                    <a class="text-primary float-end" title="" data-ripple=""><button
+                                            class="btn profile-edit-btn"> Edit
+                                            Profile</button>
+                                    </a>
+                                    {% else %}
+                                    <a class="text-primary float-end" title="" data-ripple=""><button type="submit"
+                                            style="background-color: #ffc0cb; border: #ffc0cb">
+                                            Follow
+                                        </button></a>
+
+                                    {% endif %}
+                                </form> -->
+                                <!-- <p class="user-name text-primary float-end">Follow</p> -->
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </section>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MDB -->
+
+    <script src="{% static 'assets/js/mdb.min.js' %}"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+
+    <script type="text/javascript">
+        $('.like-button').click(function () {
+            var catid;
+            catid = $(this).attr("data-catid");
+            $.ajax(
+                {
+                    type: "GET",
+                    url: "/like-post",
+                    data: {
+                        post_id: catid
+                    },
+                    success: function (data) {
+                        if (data == 0) {
+                            $('.like-mess').text("No likes");
+                        }
+                        else if (data == 1) {
+                            $('.like-mess').text("Liked by " + data + " person");
+                        }
+                        else {
+                            $('.like-mess').text("Liked by " + data + " people");
+                        }
+
+                    }
+                })
+
+        });
+    </script>
+</body>
+
+</html>

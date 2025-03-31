@@ -1,0 +1,205 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <title>Profile - {{user_profile.user.username}}</title>
+    <!-- MDB icon -->
+    <link rel="icon" href="{% static 'assets/images/soundcloud.png' %}" type="image/png" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <!-- Google Fonts Roboto -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" />
+    <!-- MDB -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="{% static 'assets/css/mdb.min.css' %}" />
+
+
+</head>
+
+
+<body>
+    <style>
+        body {
+            background-color: #fafafa;
+            margin-bottom: 3rem;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1;
+        }
+
+        h1 {
+            margin-bottom: -0.5rem
+        }
+
+        .row {
+            --mdb-gutter-x: -0.5rem;
+        }
+
+        .modal-backdrop {
+            z-index: 0;
+        }
+    </style>
+    <header>
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <!-- Container wrapper -->
+            <div class="container-fluid">
+                <!-- Toggle button -->
+                <button class="navbar-toggler" type="button" data-mdb-toggle="collapse"
+                    data-mdb-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <!-- Collapsible wrapper -->
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-5">
+                                <a class="navbar-brand" href="/">
+                                    <img src="https://banner2.cleanpng.com/20190418/wfj/kisspng-logo-photography-music-image-soundcloud-soundcloud-logo-svg-png-icon-free-download-4-963-5cb945e4bd62b7.7101502515556459247757.jpg"
+                                        height="30" alt="Ins Logo" loading="lazy" />
+                                </a>
+                            </div>
+                            <div class="col-md-2">
+                                <form class="d-flex input-group w-auto">
+                                    <input type="search" class="form-control rounded" placeholder="Search"
+                                        aria-label="Search" aria-describedby="search-addon" />
+
+                                </form>
+                            </div>
+                            <div class="col-md-3">
+                                <ul class="navbar-nav justify-content-center ">
+                                    <!-- Icons -->
+                                    <li class="nav-item me-3 me-lg-0">
+                                        <a class="nav-link" href="#">
+                                            <i class="fas fa-home fa-lg text-dark"></i>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item me-3 me-lg-0">
+                                        <a class="nav-link" href="/messages">
+                                            <i class="fab fa-facebook-messenger fa-lg text-dark"></i>
+                                        </a>
+                                    </li>
+                                    <!-- Upload files dropdown -->
+                                    <li class="nav-item me-3 me-lg-0">
+
+                                        <!-- Button trigger modal -->
+                                        <a class="nav-link" style="cursor: pointer;" data-mdb-toggle="modal"
+                                            data-mdb-target="#exampleModal">
+                                            <i class="far fa-plus-square fa-lg text-dark"></i>
+                                        </a>
+
+                                        <!-- Modal -->
+                                        <div class="modal fade" id="exampleModal" tabindex="-1"
+                                            aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <form method="post" action="/upload" enctype="multipart/form-data">
+                                                        {% csrf_token %}
+                                                        <div class="modal-header text-center">
+                                                            <h5 class="modal-title" id="exampleModalLabel">Create New
+                                                                Post
+                                                            </h5>
+                                                            <button type="button" class="btn-close"
+                                                                data-mdb-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+
+                                                            <input type="file" name="image_upload"><br><br>
+                                                            <input type="file" name="music_upload"><br><br>
+                                                            <textarea class="button soft-warning small" name="caption"
+                                                                placeholder="Caption..."></textarea>
+
+
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary"
+                                                                    data-mdb-dismiss="modal">Close</button>
+                                                                <button type="submit" class="btn btn-primary">Save
+                                                                    changes</button>
+                                                            </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+
+                                    </li>
+                                    <!-- Avatar dropdown -->
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle d-flex align-items-center"
+                                            style="cursor: pointer;" id="navbarDropdownMenuLink" role="button"
+                                            data-mdb-toggle="dropdown" aria-expanded="false">
+                                            <img src="{{main_profile.profile_pic.url}}" class="rounded-circle"
+                                                height="25" width="25" alt="Profile" />
+
+                                        </a>
+                                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                            <li>
+                                                <a class="dropdown-item" href="/profile/{{request.user.username}}">My
+                                                    profile</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="/settings">Settings</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="/logout">Logout</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Collapsible wrapper -->
+
+                <!-- Right elements -->
+                <div class="d-flex align-items-center">
+                    <!-- Icon -->
+
+                    <!-- Notifications -->
+
+                    <!-- Avatar -->
+
+                </div>
+                <!-- Right elements -->
+            </div>
+            <!-- Container wrapper -->
+        </nav>
+
+        <!-- Navbar -->
+    </header>
+
+    {% block content %}
+
+    {% endblock %}
+
+
+
+
+
+
+
+
+    <!-- Scripts
+    ================================================== -->
+    <script src="{% static 'assets/js/mdb.min.js' %}"></script>
+</body>
+
+
+</html>

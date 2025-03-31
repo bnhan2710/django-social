@@ -1,0 +1,132 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <title>Sign up</title>
+    <!-- MDB icon -->
+    <link rel="icon" href="{% static 'assets/images/soundcloud.png' %}" type="image/png" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <!-- Google Fonts Roboto -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" />
+    <!-- MDB -->
+    <link rel="stylesheet" href="{% static 'assets/css/mdb.min.css' %}" />
+    <style>
+        .container {
+            margin-top: 30px
+        }
+    </style>
+</head>
+
+
+<body>
+    <main>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mx-auto border">
+
+                    <img class="images" width="100%"
+                        src="https://media0.giphy.com/media/mTuvku74NSGnC/200w.webp?cid=ecf05e47esal5ebnuyypxrfqwbdrw23k9ke0irzbgz2q06o6&rid=200w.webp&ct=g"
+                        alt="">
+                    <form action="" method="POST">
+                        {% csrf_token %}
+                        <!-- Username input -->
+                        <div class="form-outline mb-3 mt-3">
+                            <input type="text" name="username" id="form2Example1" class="form-control"
+                                placeholder="Username" />
+                            <label class="form-label" for="form3Example3">Username</label>
+
+                        </div>
+                        <!-- Email input -->
+                        <div class="form-outline mb-3 mt-3">
+                            <input type="email" name="email" id="form2Example2" class="form-control"
+                                placeholder="Email" />
+                            <label class="form-label" for="form3Example3">Email</label>
+
+                        </div>
+
+                        <!-- Password input -->
+                        <div class="form-outline mb-3 mt-3">
+                            <input type="password" name="password" id="form2Example3" class="form-control"
+                                placeholder="Password" />
+                            <label class="form-label" for="form3Example3">Password</label>
+
+                        </div>
+
+                        <!-- Confirm Password input -->
+                        <div class="form-outline mb-3 mt-3">
+                            <input type="password" name="password2" id="form2Example4" class="form-control"
+                                placeholder="Confirm password" />
+                            <label class="form-label" for="form3Example3">Confirm Password</label>
+
+                        </div>
+                        <div>
+                            <style>
+                                h5 {
+                                    font-size: 15px;
+                                    text-align: center;
+                                    color: red;
+                                }
+                            </style>
+                            {%for message in messages %}
+                            <h5>{{message}}</h5>
+                            {% endfor %}
+                        </div>
+
+
+                        <!-- Submit button -->
+                        <button type="submit" class="btn btn-danger btn-block mb-4">Sign up</button>
+
+                        <!-- Register buttons -->
+                        <div class="text-center mb-3 border-top">
+                            <p>Do you have an account? <a href="/signin">Sign in</a></p>
+                            <p>or sign up with:</p>
+                            <button type="button" class="btn btn-primary btn-floating mx-1">
+                                <i class="fab fa-facebook-f"></i>
+                            </button>
+
+                            <button type="button" class="btn btn-danger btn-floating mx-1">
+                                <i class="fab fa-google"></i>
+                            </button>
+
+                            <button type="button" class="btn btn-info btn-floating mx-1">
+                                <i class="fab fa-twitter"></i>
+                            </button>
+
+                            <button type="button" class="btn btn-dark btn-floating mx-1">
+                                <i class="fab fa-github"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+
+
+
+    <!-- MDB -->
+
+    <script src="{% static 'assets/js/mdb.min.js' %}"></script>
+    <script src="{% static 'assets/js/tippy.all.min.js' %}"></script>
+    <script src="{% static 'assets/js/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'assets/js/uikit.js' %}"></script>
+    <script src="{% static 'assets/js/simplebar.js' %}"></script>
+    <script src="{% static 'assets/js/custom.js' %}"></script>
+
+
+
+</body>
+
+
+
+
+</html>
