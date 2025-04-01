@@ -2,7 +2,7 @@ from asyncio import threads
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from matplotlib import image
 from pip import main
@@ -77,7 +77,18 @@ def index(request):
     usersuggest_profile_list = list(chain(*usersuggest_profile_list))
     # print(usersuggest_profile_list)
 
-    return render(request, 'index.html', {'user_profile': user_profile, 'posts': feed, 'usersuggest_profile_list': usersuggest_profile_list[:4]})
+    # Get posts that the current user has liked
+    user_likes = LikePost.objects.filter(username=request.user.username).values_list('post_id', flat=True)
+    liked_posts = list(user_likes)
+    
+    context = {
+        'user_profile': user_profile,
+        'posts': feed,
+        'usersuggest_profile_list': usersuggest_profile_list[:4],
+        'liked_posts': liked_posts
+    }
+    
+    return render(request, 'index.html', context)
 
 
 def signup(request):
@@ -188,20 +199,21 @@ def like_post(request):
 
     post = Post.objects.get(id=post_id)
 
-    like_filter = LikePost.objects.filter(
-        post_id=post_id, username=username).first()
+    like_filter = LikePost.objects.filter(post_id=post_id, username=username).first()
 
     if like_filter == None:
         new_like = LikePost.objects.create(post_id=post_id, username=username)
         new_like.save()
-        post.no_of_likes += 1
+        post.no_of_likes = post.no_of_likes + 1
         post.save()
-        return HttpResponse(post.no_of_likes)
+        status = 'liked'
     else:
-        post.no_of_likes -= 1
-        post.save()
         like_filter.delete()
-        return HttpResponse(post.no_of_likes)
+        post.no_of_likes = post.no_of_likes - 1
+        post.save()
+        status = 'unliked'
+
+    return JsonResponse({'likes': post.no_of_likes, 'status': status})
 
 
 @login_required(login_url='signin')
@@ -305,9 +317,19 @@ def view_post(request, pk):
         return redirect('/post/' + str(pk))
     user_object = User.objects.get(username=post.user)
     user_profile = Profile.objects.get(user=user_object)
-    return render(request, 'view_post.html', {'main_profile': main_profile,
-                                              'post': post,
-                                              'user_profile': user_profile})
+
+    # Get posts that the current user has liked
+    user_likes = LikePost.objects.filter(username=request.user.username).values_list('post_id', flat=True)
+    liked_posts = list(user_likes)
+    
+    context = {
+        'main_profile': main_profile,
+        'post': post,
+        'user_profile': user_profile,
+        'liked_posts': liked_posts
+    }
+    
+    return render(request, 'view_post.html', context)
 
 
 @login_required(login_url='signin')
@@ -340,3 +362,39 @@ def sendmessage(request, pk):
         user=request.user, receiver=User.objects.get(pk=pk))
     thread.save(update_fields=['updated_at'])
     return redirect('/messages/')
+
+
+@login_required(login_url='signin')
+def edit_post(request, pk):
+    post = Post.objects.get(id=pk)
+    
+    # Check if the current user is the post owner
+    if request.user.username != post.user:
+        return redirect('/')
+    
+    if request.method == 'POST':
+        caption = request.POST.get('caption')
+        
+        # Handle the image update if provided
+        if request.FILES.get('image_upload'):
+            # If there's an existing image, delete it (optional)
+            if post.image:
+                post.image.delete()
+            post.image = request.FILES.get('image_upload')
+        
+        # Handle the music update if provided
+        if request.FILES.get('music_upload'):
+            # If there's existing music, delete it (optional)
+            if post.music:
+                post.music.delete()
+            post.music = request.FILES.get('music_upload')
+        
+        post.caption = caption
+        post.save()
+        
+        return redirect('/post/' + str(pk))
+    
+    context = {
+        'post': post
+    }
+    return render(request, 'edit_post.html', context)

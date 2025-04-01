@@ -1,383 +1,453 @@
 {% extends "base.html" %}
 {% load static %}
 
-
 {% block content %}
-
-
 <main>
     <style>
-        img {
-            display: block;
+        :root {
+            --main-color: #1b78c7;
+            --accent-color: #ff4d67;
+            --light-color: #f8f9fa;
+            --dark-color: #333;
+            --border-color: #eaeaea;
+            --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
-
+        
+        main {
+            background-color: #f0f2f5;
+            padding: 30px 0;
+            font-family: 'Inter', sans-serif;
+        }
+        
         .container-profile {
-            max-width: 93.5rem;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 0 12rem;
+            padding: 0 2rem;
         }
-
-        .btn {
-            display: inline-block;
-            font: inherit;
-            background: none;
-            border: none;
-            color: inherit;
-            padding: 0;
-            cursor: pointer;
-        }
-
-        .btn:focus {
-            outline: 0.5rem auto #4d90fe;
-        }
-
-        .visually-hidden {
-            position: absolute !important;
-            height: 1px;
-            width: 1px;
-            overflow: hidden;
-            clip: rect(1px, 1px, 1px, 1px);
-        }
-
-        /* Profile Section */
-
+        
+        /* Profile Card */
         .profile {
-            padding: 5rem 0;
+            background-color: white;
+            border-radius: 15px;
+            padding: 3rem;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
         }
-
+        
+        .profile::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 120px;
+            background: linear-gradient(45deg, var(--main-color), var(--accent-color));
+            z-index: 0;
+        }
+        
         .profile::after {
             content: "";
             display: block;
             clear: both;
         }
-
+        
+        /* Profile Image */
         .profile-image {
             float: left;
-            width: calc(33.333% - 1rem);
+            width: calc(25% - 1rem);
             display: flex;
             justify-content: center;
             align-items: center;
             margin-right: 3rem;
+            position: relative;
+            z-index: 1;
         }
-
+        
         .profile-image img {
             margin-top: 20px;
             border-radius: 50%;
+            border: 5px solid white;
+            box-shadow: var(--box-shadow);
+            transition: all 0.3s ease;
         }
-
-
+        
+        .profile-image img:hover {
+            transform: scale(1.05);
+        }
+        
+        /* Profile User Settings */
         .profile-user-settings {
-            margin-top: 1.5rem;
+            margin-top: 2.5rem;
+            position: relative;
+            z-index: 1;
         }
-
+        
         .profile-user-name {
             display: inline-block;
-            font-size: 1.5rem;
-            font-weight: 300;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
         }
-
+        
         .profile-edit-btn {
-            font-size: 0.8rem;
-            line-height: 2;
-            border: 0.1rem solid #dbdbdb;
-            border-radius: 0.3rem;
-            padding: 0 2rem;
-            /* margin-left: 7rem; */
+            font-size: 0.9rem;
+            font-weight: 500;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            padding: 0.5rem 1.5rem;
+            margin-left: 1rem;
+            transition: all 0.3s ease;
         }
-
+        
+        .profile-edit-btn:hover {
+            background-color: var(--border-color);
+            color: var(--dark-color);
+        }
+        
+        .btn-primary {
+            background-color: var(--main-color);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0d6efd;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Profile Stats */
         .profile-stats {
-            margin-top: 1.5rem;
+            margin-top: 2rem;
+            position: relative;
+            z-index: 1;
         }
-
+        
+        .profile-stats ul {
+            display: flex;
+            padding: 1rem 0;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
         .profile-stats li {
             display: inline-block;
-            font-size: 1rem;
+            font-size: 1.1rem;
             line-height: 1.5;
-            margin-right: 3rem;
+            margin-right: 4rem;
             cursor: pointer;
+            color: var(--dark-color);
+            transition: all 0.3s ease;
         }
-
+        
+        .profile-stats li:hover {
+            color: var(--main-color);
+        }
+        
         .profile-stats li:last-of-type {
             margin-right: 0;
         }
-
+        
+        .profile-stat-count {
+            font-weight: 700;
+            color: var(--main-color);
+            margin-right: 0.5rem;
+        }
+        
+        /* Profile Bio */
         .profile-bio {
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 400;
-            line-height: 1.5;
+            line-height: 1.6;
+            margin-top: 2rem;
+            color: #666;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .profile-real-name {
+            font-weight: 700;
+            color: var(--dark-color);
+            font-size: 1.2rem;
+        }
+        
+        /* Location */
+        .profile-bio p:last-child {
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+        }
+        
+        .profile-bio p:last-child:before {
+            content: "📍 ";
+        }
+        
+        /* Gallery Grid */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
             margin-top: 1rem;
         }
-
-        .profile-real-name,
-        .profile-stat-count,
-        .profile-edit-btn {
-            font-weight: 600;
-        }
-
-        /* Gallery Section */
-
-        .gallery {
-            display: flex;
-            flex-wrap: wrap;
-            margin: -1rem -1rem;
-            padding-bottom: 3rem;
-        }
-
+        
         .gallery-item {
             position: relative;
-            flex: 1 0 15rem;
-            margin: 1rem;
-            color: #fff;
-            cursor: pointer;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: all 0.3s ease;
         }
-
-        /* .gallery-item:hover .gallery-item-info,
-        .gallery-item:focus .gallery-item-info {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: absolute;
-            top: 0;
+        
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .gallery-item a {
+            display: block;
             width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.3);
-        } */
-
-        .gallery-item-info {
-            display: none;
+            height: 300px;
+            position: relative;
+            background-color: #f5f5f5;
+            border-radius: 12px;
         }
-
-        .gallery-item-info li {
-            display: inline-block;
-            font-size: 1.7rem;
-            font-weight: 600;
-        }
-
-        .gallery-item-likes {
-            margin-right: 2.2rem;
-        }
-
-        .gallery-item-type {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            font-size: 2.5rem;
-            text-shadow: 0.2rem 0.2rem 0.2rem rgba(0, 0, 0, 0.1);
-        }
-
-        .fa-clone,
-        .fa-comment {
-            transform: rotateY(180deg);
-        }
-
-        .gallery-image {
+        
+        .gallery-item img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            border-radius: 12px;
+            transition: transform 0.5s ease;
         }
-
-        .loader {
-            width: 2rem;
-            height: 2rem;
-            border: 0.3rem solid #999;
-            border-bottom-color: transparent;
-            border-radius: 50%;
-            margin: 0 auto;
-            animation: loader 500ms linear infinite;
+        
+        .gallery-item:hover img {
+            transform: scale(1.05);
         }
-
-
+        
+        .gallery-item-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 15px;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            border-radius: 0 0 12px 12px;
+        }
+        
+        .gallery-item:hover .gallery-item-info {
+            opacity: 1;
+        }
+        
+        .gallery-item-likes, .gallery-item-comments {
+            display: flex;
+            align-items: center;
+        }
+        
+        .gallery-item-likes i, .gallery-item-comments i {
+            margin-right: 5px;
+        }
+        
+        /* Audio controls */
+        audio {
+            width: 100%;
+            margin-top: 10px;
+            border-radius: 30px;
+        }
+        
+        audio::-webkit-media-controls-panel {
+            background-color: var(--light-color);
+        }
+        
+        /* Empty state */
+        .empty-gallery {
+            text-align: center;
+            padding: 50px 0;
+            color: #999;
+        }
+        
+        .empty-gallery i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #ccc;
+        }
+        
         /* Media Query */
-
-        @media screen and (max-width: 40rem) {
+        @media screen and (max-width: 768px) {
+            .container-profile {
+                padding: 0 1rem;
+            }
+            
             .profile {
-                display: flex;
-                flex-wrap: wrap;
-                padding: 4rem 0;
+                padding: 2rem 1.5rem;
             }
-
-            .profile::after {
-                display: none;
+            
+            .profile::before {
+                height: 80px;
             }
-
-            .profile-image,
-            .profile-user-settings,
-            .profile-bio,
-            .profile-stats {
+            
+            .profile-image {
                 float: none;
-                width: auto;
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 2rem;
             }
-
+            
             .profile-image img {
-                width: 7.7rem;
+                width: 120px;
+                height: 120px;
             }
-
+            
             .profile-user-settings {
-                flex-basis: calc(100% - 10.7rem);
-                display: flex;
-                flex-wrap: wrap;
-                margin-top: 1rem;
-            }
-
-            .profile-user-name {
-                font-size: 2.2rem;
-            }
-
-            .profile-edit-btn {
-                order: 1;
-                padding: 0;
                 text-align: center;
-                margin-top: 1rem;
             }
-
-            .profile-edit-btn {
+            
+            .profile-edit-btn, .btn-primary {
+                margin-top: 1rem;
+                display: block;
+                width: 100%;
                 margin-left: 0;
             }
-
-            .profile-bio {
-                font-size: 1.4rem;
-                margin-top: 1.5rem;
-            }
-
-            .profile-edit-btn,
-            .profile-bio,
-            .profile-stats {
-                flex-basis: 100%;
-            }
-
-            .profile-stats {
-                order: 1;
-                margin-top: 1.5rem;
-            }
-
+            
             .profile-stats ul {
-                display: flex;
-                text-align: center;
-                padding: 1.2rem 0;
-                border-top: 0.1rem solid #dadada;
-                border-bottom: 0.1rem solid #dadada;
+                justify-content: center;
             }
-
+            
             .profile-stats li {
-                font-size: 1.4rem;
-                flex: 1;
-                margin: 0;
+                margin-right: 2rem;
+                font-size: 0.9rem;
             }
-
-            .profile-stat-count {
-                display: block;
+            
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             }
-
         }
-
-        /* Spinner Animation */
-
-        @keyframes loader {
-            to {
-                transform: rotate(360deg);
+        
+        @media screen and (max-width: 480px) {
+            .profile {
+                padding: 1.5rem 1rem;
+            }
+            
+            .profile-user-name {
+                font-size: 1.5rem;
+            }
+            
+            .gallery-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
     <div class="container-profile">
         <div class="profile">
-
             <div class="profile-image">
-
                 <img src="{{user_profile.profile_pic.url}}" alt="" height="180" width="180" style="object-fit:cover;">
-
             </div>
-
+            
             <div class="profile-user-settings">
                 <form action="/follow" method="post">
                     {% csrf_token %}
-
                     <input type="hidden" value="{{user.username}}" name="follower" />
                     <input type="hidden" value="{{user_object.username}}" name="user" />
-                    <h1 class="profile-user-name">@{{user_profile.user.username}} </h1>
-
+                    <h1 class="profile-user-name">@{{user_profile.user.username}}</h1>
+                    
                     {% if user_object.username == request.user.username %}
-                    <a href="/settings" class="btn profile-edit-btn">Edit
-                        Profile
+                    <a href="/settings" class="btn profile-edit-btn">
+                        <i class="fas fa-cog"></i> Edit Profile
                     </a>
                     {% else %}
-                    <a href="/sendmessage/{{user_profile.user.id}}" style="margin-left:10px;padding:5px;"
-                        class=" btn btn-primary">
-                        Message
+                    <a href="/sendmessage/{{user_profile.user.id}}" class="btn btn-primary">
+                        <i class="fas fa-envelope"></i> Message
                     </a>
-                    <button style="margin-left:10px;padding:5px;" class=" btn btn-primary" type="submit">
+                    <button class="btn btn-primary" type="submit">
+                        {% if follow == "Follow" %}
+                        <i class="fas fa-user-plus"></i>
+                        {% else %}
+                        <i class="fas fa-user-minus"></i>
+                        {% endif %}
                         {{follow}}
                     </button>
                     {% endif %}
                 </form>
             </div>
-
+            
             <div class="profile-stats">
-
                 <ul>
                     {% if user_posts_length == 0%}
-                    <li><span class="profile-stat-count">No posts yet</li>
+                    <li><span class="profile-stat-count">0</span> posts</li>
                     {% else %}
                     <li><span class="profile-stat-count">{{user_posts_length}}</span> posts</li>
                     {% endif %}
+                    
                     {% if user_followers == 0 or user_followers == 1 %}
                     <li><span class="profile-stat-count">{{user_followers}}</span> follower</li>
                     {% else %}
                     <li><span class="profile-stat-count">{{user_followers}}</span> followers</li>
                     {% endif %}
+                    
                     <li><span class="profile-stat-count">{{user_following}}</span> following</li>
                 </ul>
-
             </div>
-
+            
             <div class="profile-bio">
-
                 <p><span class="profile-real-name">{{user_profile.user.username}}</span>
-                    <br>{{user_profile.bio}}
-                    <br>
+                <br>{{user_profile.bio}}</p>
+                {% if user_profile.location %}
                 <p>{{user_profile.location}}</p>
-                </p>
-
+                {% endif %}
             </div>
-
         </div>
         <!-- End of profile section -->
-        <div class="d-flex flex-wrap">
-            {% for post in user_posts%}
-
-
+        
+        {% if user_posts|length > 0 %}
+        <div class="gallery-grid">
+            {% for post in user_posts %}
             <div class="gallery-item">
-
-                <a href="/post/{{post.id}}" class="bg-image hover-overlay ripple shadow-1-strong rounded-0"
-                    data-ripple-color="light" style="width:400px ; height:400px;">
-{#                    <img src="{{post.image.url}}" class="w-100" />#}
-{#                    <audio controls style="width: -webkit-fill-available;">#}
-{#                        <source src="{{post.music.url}}" type="audio/mp3">#}
-{#                    </audio>#}
+                <a href="/post/{{post.id}}">
+                    {% if post.image %}
+                    <img src="{{post.image.url}}" alt="Post image" />
+                    {% endif %}
+                    
+                    {% if post.music %}
+                    <audio controls>
+                        <source src="{{post.music.url}}" type="audio/mp3">
+                    </audio>
+                    {% endif %}
+                    
+                    <div class="gallery-item-info">
+                        <div class="gallery-item-likes">
+                            <i class="fas fa-heart"></i> 
+                            <!-- You can add actual like count here if available -->
+                        </div>
+                        <div class="gallery-item-comments">
+                            <i class="fas fa-comment"></i>
+                            <!-- You can add comment count here if available -->
+                        </div>
+                    </div>
                 </a>
-
-                <!-- <ul>
-                        <li class="gallery-item-likes"><span class="visually-hidden">Likes:</span><i
-                                class="fas fa-heart" aria-hidden="true"></i> 56</li>
-                        <li class="gallery-item-comments"><span class="visually-hidden">Comments:</span><i
-                                class="fas fa-comment" aria-hidden="true"></i> 2</li>
-                    </ul> -->
-
             </div>
-
             {% endfor %}
         </div>
-
-
-    </div>
-    <!-- End of gallery -->
-
-    <!-- <div class="loader"></div> -->
-
+        {% else %}
+        <div class="empty-gallery">
+            <i class="far fa-images"></i>
+            <h3>No posts yet</h3>
+            <p>When you post something, it will appear here.</p>
+        </div>
+        {% endif %}
+        
     </div>
     <!-- End of container -->
-
 </main>
-
-
-
 {% endblock %}

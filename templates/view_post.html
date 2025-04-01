@@ -40,12 +40,11 @@
             </div>
         </div>
         <!-- Photos -->
+        {% if post.image %}
         <div class="bg-image hover-overlay ripple shadow-1-strong rounded-0" data-ripple-color="light">
             <img src="{{post.image.url}}" class="w-100" />
-            <audio controls style="width: -webkit-fill-available;">
-                <source src="{{post.music.url}}" type="audio/mp3">
-            </audio>
         </div>
+        {% endif %}
 
         <!-- Interaction -->
         <div class="card-body">
@@ -105,7 +104,7 @@
                             </div>
                         </div>
                         <div class="col-md-1">
-                            <input type="submit" class="text-info mt-1 text-end" value="Post">
+                            <input type="submit" class="text-info mt-1 text-end" value="Send">
                         </div>
                     </form>
 
@@ -120,6 +119,8 @@
     $('.like-button').click(function () {
         var catid;
         catid = $(this).attr("data-catid");
+        var likeMessElement = $(this).closest('.card-body').find('.like-mess');
+        
         $.ajax(
             {
                 type: "GET",
@@ -129,18 +130,16 @@
                 },
                 success: function (data) {
                     if (data == 0) {
-                        $('.like-mess').text("No likes");
+                        likeMessElement.text("No likes yet");
                     }
                     else if (data == 1) {
-                        $('.like-mess').text("Liked by " + data + " person");
+                        likeMessElement.text("Liked by " + data + " person");
                     }
                     else {
-                        $('.like-mess').text("Liked by " + data + " people");
+                        likeMessElement.text("Liked by " + data + " people");
                     }
-
                 }
             })
-
     });
 </script>
 {% endblock %}

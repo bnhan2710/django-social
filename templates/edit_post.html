@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Edit Post</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Current Image (if exists) -->
+                        {% if post.image %}
+                        <div class="mb-4">
+                            <p><strong>Current Image:</strong></p>
+                            <img src="{{ post.image.url }}" class="img-fluid rounded" style="max-height: 300px;">
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Image Upload -->
+                        <div class="mb-3">
+                            <label for="image_upload" class="form-label">Change Image (optional)</label>
+                            <input type="file" name="image_upload" id="image_upload" class="form-control">
+                            <small class="text-muted">Leave empty to keep the current image</small>
+                        </div>
+                        
+                        <!-- Music Upload (if applicable) -->
+                        <div class="mb-3">
+                            <label for="music_upload" class="form-label">Change Music (optional)</label>
+                            <input type="file" name="music_upload" id="music_upload" class="form-control">
+                            <small class="text-muted">Leave empty to keep the current music</small>
+                        </div>
+                        
+                        <!-- Caption -->
+                        <div class="mb-3">
+                            <label for="caption" class="form-label">Caption</label>
+                            <textarea class="form-control" name="caption" id="caption" rows="4">{{ post.caption }}</textarea>
+                        </div>
+                        
+                        <!-- Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <a href="/post/{{ post.id }}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

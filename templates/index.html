@@ -7,7 +7,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
-    <title>Music Social Media</title>
+    <title>Social Media</title>
     <!-- MDB icon -->
     <link rel="icon" href="{% static 'assets/images/soundcloud.png' %}" type="image/png" />
     <!-- Font Awesome -->
@@ -308,16 +308,19 @@
                         {% for post in posts%}
                         <div class="post my-5">
                             <div class="card">
+                                <!-- Card body (thông tin người đăng) -->
                                 <div class="card-body">
                                     <div class="container">
                                         <!-- Author -->
                                         <div class="row">
                                             <div class="col-md-8 ">
                                                 <div class="d-flex story ">
-                                                    <img src="{{post.img}}" class="rounded-circle" height="40"
-                                                        width="40" alt="Avatar" />
+                                                    <a href="/profile/{{post.user}}" style="text-decoration: none; color: inherit;" onclick="event.stopPropagation();">
+                                                        <img src="{{post.img}}" class="rounded-circle" height="40"
+                                                            width="40" alt="Avatar" />
+                                                    </a>
                                                     <div class="mt-2 mx-2">
-                                                        <a href="/profile/{{post.user}}" class="text-dark">
+                                                        <a href="/profile/{{post.user}}" class="text-dark" onclick="event.stopPropagation();">
                                                             <strong class="">@{{post.user}}</strong>
                                                         </a>
                                                     </div>
@@ -329,20 +332,16 @@
                                                         {% if request.user.username == post.user %}
                                                         <a class="text-reset me-3 dropdown-toggle hidden-arrow" href="#"
                                                             id="navbarDropdownMenuLink" role="button"
-                                                            data-mdb-toggle="dropdown" aria-expanded="false">
+                                                            data-mdb-toggle="dropdown" aria-expanded="false" onclick="event.stopPropagation();">
                                                             <i class="fas fa-ellipsis-h mt-3"></i>
                                                         </a>
-                                                        <!-- <div class="dropdown-menu dropdown-menu-right"
-                                                            aria-labelledby="navbarDropdownMenuLink">
-                                                            <a class="dropdown-item" href="/edit/{{post.id}}">Edit</a>
-                                                            <a class="dropdown-item"
-                                                                href="/delete/{{post.id}}">Delete</a>
-                                                        </div> -->
                                                         <ul class="dropdown-menu dropdown-menu-end"
-                                                            aria-labelledby="navbarDropdownMenuLink">
+                                                            aria-labelledby="navbarDropdownMenuLink" onclick="event.stopPropagation();">
                                                             <li>
-                                                                <a class="dropdown-item"
-                                                                    href="{% url 'delete_event' post.id %}">Delete</a>
+                                                                <a class="dropdown-item" href="/edit-post/{{post.id}}">Edit Post</a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item" href="#" onclick="confirmDelete(`{% url 'delete_event' post.id %}`, event)">Delete</a>
                                                             </li>
                                                             <li>
                                                                 <a class="dropdown-item" href="#">Another news</a>
@@ -360,25 +359,31 @@
                                         </div>
                                     </div>
                                 </div>
-                                <!-- Photos -->
+                                
+                                <!-- Photos - Khôi phục lại cấu trúc cũ để ảnh vẫn clickable -->
+                                {% if post.image %}
                                 <a href="/post/{{post.id}}"
                                     class="bg-image hover-overlay ripple shadow-1-strong rounded-0"
                                     data-ripple-color="light">
-{#                                    <img src="{{post.image.url}}" class="w-100" />#}
-{#                                    <audio controls style="width: -webkit-fill-available;">#}
-{#                                        <source src="{{post.music.url}}" type="audio/mp3">#}
-{#                                    </audio>#}
+                                    <img src="{{post.image.url}}" class="w-100" />
                                 </a>
+                                {% endif %}
 
-                                <!-- Interaction -->
+                                <!-- Phần nội dung và tương tác phía dưới -->
                                 <div class="card-body">
                                     <div class="container">
                                         <div class="row">
                                             <div class="col-md-8">
-                                                <a id="like{{post.id}}" data-catid="{{post.id}}" class="like-button">
+                                                <a id="like{{post.id}}" data-catid="{{post.id}}" class="like-button" onclick="event.stopPropagation();">
+                                                    {% if post.id in liked_posts %}
+                                                    <i class="fas fa-heart fa-lg ml-0" style="color: red;"></i>
+                                                    {% else %}
                                                     <i class="far fa-heart fa-lg ml-0"></i>
+                                                    {% endif %}
                                                 </a>
-                                                <i class="far fa-comment fa-lg mx-3"></i>
+                                                <a href="/post/{{post.id}}" class="text-dark" style="text-decoration: none;">
+                                                    <i class="far fa-comment fa-lg mx-3"></i>
+                                                </a>
                                                 <i class="far fa-paper-plane fa-lg"></i>
                                             </div>
                                             <div class="col-md-4 text-end">
@@ -409,11 +414,11 @@
                                             </div>
                                         </div>
                                         <!-- Comments -->
-                                        <small class="my-1" style="color: #8E8E8E; margin-left: 4px;"><a
-                                                href="/post/{{post.id}}" class="text-dark">
-                                                {{post.count_comments}}
-                                                Comments
-                                            </a></small>
+                                        <small class="my-1" style="color: #8E8E8E; margin-left: 4px;">
+                                            <a href="/post/{{post.id}}" class="text-dark">
+                                                {{post.count_comments}} Comments
+                                            </a>
+                                        </small>
                                         {% for comment in post.post_comments %}
                                         <div class="row">
                                             <small>
@@ -530,28 +535,47 @@
         $('.like-button').click(function () {
             var catid;
             catid = $(this).attr("data-catid");
-            $.ajax(
-                {
-                    type: "GET",
-                    url: "/like-post",
-                    data: {
-                        post_id: catid
-                    },
-                    success: function (data) {
-                        if (data == 0) {
-                            $('.like-mess').text("No likes");
-                        }
-                        else if (data == 1) {
-                            $('.like-mess').text("Liked by " + data + " person");
-                        }
-                        else {
-                            $('.like-mess').text("Liked by " + data + " people");
-                        }
-
+            var likeMessElement = $(this).closest('.card-body').find('.like-mess');
+            var heartIcon = $(this).find('i');
+            
+            $.ajax({
+                type: "GET",
+                url: "/like-post",
+                data: {
+                    post_id: catid
+                },
+                success: function (data) {
+                    // Update like count message
+                    if (data.likes == 0) {
+                        likeMessElement.text("No likes yet");
                     }
-                })
-
+                    else if (data.likes == 1) {
+                        likeMessElement.text("Liked by " + data.likes + " person");
+                    }
+                    else {
+                        likeMessElement.text("Liked by " + data.likes + " people");
+                    }
+                    
+                    // Toggle heart icon based on like status
+                    if (data.status === 'liked') {
+                        heartIcon.removeClass('far').addClass('fas');
+                        heartIcon.css('color', 'red');
+                    } else {
+                        heartIcon.removeClass('fas').addClass('far');
+                        heartIcon.css('color', '');
+                    }
+                }
+            });
         });
+        
+        // New function for delete confirmation
+        function confirmDelete(deleteUrl, event) {
+            event.preventDefault();
+            var confirmed = confirm("Are you sure you want to delete this post?");
+            if (confirmed) {
+                window.location.href = deleteUrl;
+            }
+        }
     </script>
 </body>
 
