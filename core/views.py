@@ -442,6 +442,7 @@ def edit_post(request, pk):
 def recommendations(request):
     user_object = User.objects.get(username=request.user.username)
     user_profile = Profile.objects.get(user=user_object)
+    main_profile = user_profile
     
     # Get users that the current user follows
     user_following = FollowersCount.objects.filter(follower=request.user.username)
@@ -503,6 +504,7 @@ def recommendations(request):
     
     context = {
         'user_profile': user_profile,
+        'main_profile': main_profile,
         'friends_of_friends_posts': friends_of_friends_posts,
         'most_liked_posts': most_liked_posts,
         'liked_posts': liked_posts,
@@ -515,21 +517,16 @@ def recommendations(request):
 def popular_posts(request):
     user_object = User.objects.get(username=request.user.username)
     user_profile = Profile.objects.get(user=user_object)
+    main_profile = user_profile
     
-    # Get users that the current user follows
-    user_following = FollowersCount.objects.filter(follower=request.user.username)
-    following_usernames = [user.user for user in user_following]
+    # Get most liked posts
+    most_liked_posts = Post.objects.all().order_by('-no_of_likes')[:20]
     
-    # Get most liked posts (excluding user's own posts and followed users' posts)
-    most_liked_posts = Post.objects.exclude(user=request.user.username).exclude(
-        user__in=following_usernames
-    ).order_by('-no_of_likes')[:20]  # Show more posts on the dedicated page
-    
-    # Process posts to add profile pic and other details
+    # Process most liked posts
     for post in most_liked_posts:
         user_obj = User.objects.get(username=post.user)
         post.img = Profile.objects.get(user=user_obj).profile_pic.url
-        post.post_comments = Comment.objects.filter(post=post).order_by('-created_at')[:3]
+        post.post_comments = Comment.objects.filter(post=post).order_by('-created_at')[0:2]
         post.count_comments = Comment.objects.filter(post=post).count()
     
     # Get posts that the current user has liked
@@ -538,9 +535,131 @@ def popular_posts(request):
     
     context = {
         'user_profile': user_profile,
+        'main_profile': main_profile,
         'most_liked_posts': most_liked_posts,
         'liked_posts': liked_posts,
-        'main_profile': user_profile,  # For the navbar profile picture
     }
     
     return render(request, 'popular_posts.html', context)
+
+
+@login_required(login_url='signin')
+def friends_network(request):
+    user_object = User.objects.get(username=request.user.username)
+    user_profile = Profile.objects.get(user=user_object)
+    
+    # Get users that the current user follows
+    user_following = FollowersCount.objects.filter(follower=request.user.username)
+    following_list = [user.user for user in user_following]
+    
+    # Get profile information for followed users
+    followed_profiles = []
+    for username in following_list:
+        try:
+            user_obj = User.objects.get(username=username)
+            profile = Profile.objects.get(user=user_obj)
+            profile.username = username
+            followed_profiles.append(profile)
+        except (User.DoesNotExist, Profile.DoesNotExist):
+            continue
+    
+    # Get users who follow the current user
+    user_followers = FollowersCount.objects.filter(user=request.user.username)
+    followers_list = [user.follower for user in user_followers]
+    
+    # Get mutual connections (users who the current user follows who also follow the current user)
+    mutual_connections = [user for user in following_list if user in followers_list]
+    
+    # Find friends of friends (second-degree connections)
+    # Dictionary to keep track of friends of friends with their connecting friends
+    friends_of_friends_dict = {}
+    
+    for friend_username in following_list:
+        # Find who your friend follows (friends of your friend)
+        try:
+            friend_follows = FollowersCount.objects.filter(follower=friend_username).values_list('user', flat=True)
+            
+            for ff_username in friend_follows:
+                # Skip if it's the current user or someone they already follow
+                if ff_username == request.user.username or ff_username in following_list:
+                    continue
+                
+                # Add or update the friend of friend entry
+                if ff_username not in friends_of_friends_dict:
+                    friends_of_friends_dict[ff_username] = {
+                        'connecting_friends': [friend_username],
+                        'mutual_friends': []
+                    }
+                else:
+                    if friend_username not in friends_of_friends_dict[ff_username]['connecting_friends']:
+                        friends_of_friends_dict[ff_username]['connecting_friends'].append(friend_username)
+        except Exception as e:
+            print(f"Error processing friend {friend_username}: {str(e)}")
+            continue
+    
+    # Now find mutual friends for each friend of friend
+    for ff_username in list(friends_of_friends_dict.keys()):
+        try:
+            # Get users that this friend of friend follows
+            ff_follows = FollowersCount.objects.filter(follower=ff_username).values_list('user', flat=True)
+            
+            # Find mutual friends (people that both the current user and this friend of friend follow)
+            mutual_friends = [username for username in following_list if username in ff_follows]
+            
+            friends_of_friends_dict[ff_username]['mutual_friends'] = mutual_friends
+        except Exception as e:
+            print(f"Error finding mutual friends for {ff_username}: {str(e)}")
+            # Remove this friend of friend if we can't get their data
+            friends_of_friends_dict.pop(ff_username, None)
+    
+    # Convert dictionary to user suggestion objects
+    user_suggestions = []
+    for ff_username, data in friends_of_friends_dict.items():
+        try:
+            user_obj = User.objects.get(username=ff_username)
+            profile = Profile.objects.get(user=user_obj)
+            
+            # Add friends of friend data
+            profile.connecting_friends = data['connecting_friends']
+            profile.mutual_friends = len(data['mutual_friends'])
+            profile.mutual_friends_profiles = []
+            
+            # Get profile info for mutual friends (limited to 3)
+            for mutual in data['mutual_friends'][:3]:
+                try:
+                    mutual_user = User.objects.get(username=mutual)
+                    mutual_profile = Profile.objects.get(user=mutual_user)
+                    profile.mutual_friends_profiles.append(mutual_profile)
+                except (User.DoesNotExist, Profile.DoesNotExist):
+                    continue
+            
+            # Get profile info for connecting friends (limited to 3)
+            profile.connecting_friends_profiles = []
+            for connecting in data['connecting_friends'][:3]:
+                try:
+                    connecting_user = User.objects.get(username=connecting)
+                    connecting_profile = Profile.objects.get(user=connecting_user)
+                    profile.connecting_friends_profiles.append(connecting_profile)
+                except (User.DoesNotExist, Profile.DoesNotExist):
+                    continue
+            
+            user_suggestions.append(profile)
+        except (User.DoesNotExist, Profile.DoesNotExist, Exception) as e:
+            print(f"Error creating suggestion for {ff_username}: {str(e)}")
+            continue
+    
+    # Sort suggestions: first by number of connecting friends, then by mutual friends
+    user_suggestions.sort(key=lambda x: (len(getattr(x, 'connecting_friends', [])), getattr(x, 'mutual_friends', 0)), reverse=True)
+    
+    # Limit to reasonable number but ensure we have enough data
+    suggestion_limit = min(12, max(6, len(user_suggestions)))
+    
+    context = {
+        'user_profile': user_profile,
+        'followed_profiles': followed_profiles,
+        'mutual_connections': mutual_connections,
+        'user_suggestions': user_suggestions[:suggestion_limit],
+        'main_profile': user_profile,
+    }
+    
+    return render(request, 'friends_network.html', context)

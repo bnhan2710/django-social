@@ -20,4 +20,5 @@ urlpatterns = [
     path('edit-post/<uuid:pk>/', views.edit_post, name='edit_post'),
     path('recommendations/', views.recommendations, name='recommendations'),
     path('popular/', views.popular_posts, name='popular_posts'),
+    path('friends-network/', views.friends_network, name='friends_network'),
 ]

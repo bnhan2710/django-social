@@ -9,19 +9,19 @@
   --warning-color: #f72585;
   --info-color: #7209b7;
   --light-color: #f8f9fa;
-  --body-bg: #f0f2f5;
+  --body-bg: #f8f9fa;
   --text-color: #212529;
   --text-muted: #65676b;
-  --navbar-bg: #fff;
-  --dropdown-bg: #fff;
+  --navbar-bg: #ffffff;
+  --dropdown-bg: #ffffff;
   --card-bg: #ffffff;
-  --input-bg: #fff;
+  --input-bg: #ffffff;
   --border-color: #e4e6eb;
-  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-color: rgba(0, 0, 0, 0.08);
   --hover-bg: #f0f2f5;
   --transition: all 0.3s ease;
   --border-radius: 10px;
-  --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .dark-mode {

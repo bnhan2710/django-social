@@ -1116,20 +1116,10 @@
         const body = document.body;
         const themeSwitchIcon = themeSwitch.querySelector('i');
         
-        // Check for saved theme preference or use preference based on system theme
-        const currentTheme = localStorage.getItem('theme');
-        if (currentTheme) {
-            body.classList.toggle('dark-mode', currentTheme === 'dark');
-            updateThemeIcon();
-        } else {
-            // Check if system prefers dark mode
-            const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-            if (prefersDarkScheme.matches) {
-                body.classList.add('dark-mode');
-                localStorage.setItem('theme', 'dark');
-                updateThemeIcon();
-            }
-        }
+        // Force light mode
+        localStorage.setItem('theme', 'light');
+        body.classList.remove('dark-mode');
+        updateThemeIcon();
         
         themeSwitch.addEventListener('click', () => {
             body.classList.toggle('dark-mode');

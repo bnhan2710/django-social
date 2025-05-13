@@ -11,16 +11,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const body = document.body;
     const themeSwitchIcon = themeSwitch ? themeSwitch.querySelector('i') : null;
     
-    // Check for saved theme preference or use light mode as default
-    const currentTheme = localStorage.getItem('theme');
-    if (currentTheme) {
-        body.classList.toggle('dark-mode', currentTheme === 'dark');
-        updateThemeIcon();
-    } else {
-        // Set light mode as default (no need to add any class since light mode is default)
-        localStorage.setItem('theme', 'light');
-        updateThemeIcon();
-    }
+    // Force light mode as default by setting 'light' in localStorage
+    localStorage.setItem('theme', 'light');
+    
+    // Remove dark-mode class if it exists
+    body.classList.remove('dark-mode');
+    updateThemeIcon();
     
     // Theme switch button event handler
     if (themeSwitch) {

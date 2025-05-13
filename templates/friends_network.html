@@ -1,0 +1,671 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Friends Network - SoundWave{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Friends Network page specific styling */
+    .navigation-tabs {
+        margin-bottom: 25px;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        background-color: var(--card-bg);
+        box-shadow: var(--box-shadow);
+        transition: var(--transition);
+    }
+    
+    .page-header {
+        margin-bottom: 25px;
+        padding: 20px;
+        border-radius: var(--border-radius);
+        background-color: var(--card-bg);
+        box-shadow: var(--box-shadow);
+        transition: var(--transition);
+    }
+    
+    .page-title {
+        color: var(--primary-color);
+        margin-bottom: 5px;
+        font-weight: 700;
+    }
+    
+    .page-subtitle {
+        color: var(--text-muted);
+        font-size: 1rem;
+        margin-bottom: 0;
+    }
+    
+    /* Network visualization container */
+    .network-container {
+        background-color: var(--card-bg);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 20px;
+        margin-bottom: 30px;
+        height: 400px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .network-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .network-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-color);
+    }
+    
+    .network-actions {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .network-action-btn {
+        background-color: var(--hover-bg);
+        color: var(--text-color);
+        border: none;
+        border-radius: 50px;
+        padding: 6px 15px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+    }
+    
+    .network-action-btn i {
+        margin-right: 5px;
+    }
+    
+    .network-action-btn:hover {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .network-visualization {
+        width: 100%;
+        height: 300px;
+        border-radius: var(--border-radius);
+        background-color: var(--body-bg);
+        position: relative;
+    }
+    
+    .network-node {
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        z-index: 10;
+    }
+    
+    .network-node:hover {
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+    
+    .network-node-avatar {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--primary-color);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .network-node-name {
+        position: absolute;
+        bottom: -25px;
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        white-space: nowrap;
+    }
+    
+    .network-edge {
+        position: absolute;
+        height: 2px;
+        background-color: var(--primary-color);
+        opacity: 0.5;
+        transform-origin: 0 0;
+        z-index: 5;
+    }
+    
+    .network-edge.mutual {
+        background-color: #4cc9f0;
+        opacity: 0.7;
+    }
+    
+    .center-node {
+        border: 3px solid #e0245e;
+        z-index: 20;
+    }
+    
+    /* Suggested friends section */
+    .friends-suggestions {
+        background-color: var(--card-bg);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 20px;
+    }
+    
+    .friends-suggestions-header {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: var(--text-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .see-all-link {
+        font-size: 0.85rem;
+        color: var(--primary-color);
+        text-decoration: none;
+    }
+    
+    .suggestions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+    }
+    
+    .suggestion-card {
+        background-color: var(--body-bg);
+        border-radius: var(--border-radius);
+        padding: 15px;
+        text-align: center;
+        transition: var(--transition);
+        box-shadow: 0 2px 5px var(--shadow-color);
+    }
+    
+    .suggestion-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px var(--shadow-color);
+    }
+    
+    .suggestion-avatar-lg {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin: 0 auto 10px;
+        border: 3px solid var(--card-bg);
+        box-shadow: 0 3px 10px var(--shadow-color);
+    }
+    
+    .suggestion-username {
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 5px;
+        color: var(--text-color);
+    }
+    
+    .mutual-connections {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+    }
+    
+    .mutual-avatars {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 15px;
+    }
+    
+    .mutual-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--body-bg);
+        margin: 0 -5px;
+    }
+    
+    .connection-info {
+        margin: 10px 0;
+        text-align: center;
+    }
+    
+    .connection-info small {
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        display: block;
+        margin-bottom: 5px;
+    }
+    
+    .connecting-friends {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 5px 0;
+    }
+    
+    .connecting-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--accent-color);
+        margin: 0 2px;
+        transition: transform 0.2s ease;
+    }
+    
+    .connecting-avatar:hover {
+        transform: scale(1.2);
+        z-index: 5;
+    }
+    
+    .more-friends {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-left: 5px;
+        background: var(--hover-bg);
+        padding: 2px 6px;
+        border-radius: 10px;
+    }
+    
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 10px;
+    }
+    
+    .view-profile-btn {
+        padding: 6px;
+        border-radius: 50px;
+        background-color: var(--hover-bg);
+        color: var(--text-color);
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.85rem;
+        transition: var(--transition);
+        text-align: center;
+    }
+    
+    .view-profile-btn:hover {
+        background-color: var(--hover-bg);
+        color: var(--primary-color);
+    }
+    
+    .no-suggestions {
+        grid-column: 1 / -1;
+        background-color: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 40px;
+        text-align: center;
+        color: var(--text-muted);
+    }
+    
+    .follow-btn-lg {
+        background-color: var(--primary-color);
+        color: white;
+        width: 100%;
+        padding: 8px;
+        border: none;
+        border-radius: 50px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    
+    .follow-btn-lg:hover {
+        background-color: var(--secondary-color);
+    }
+    
+    /* Animation classes */
+    .fade-in {
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Navigation Tabs -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="navigation-tabs">
+                <ul class="nav nav-pills nav-fill">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-stream me-2"></i>Feed
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/recommendations/">
+                            <i class="fas fa-compass me-2"></i>Recommendations
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/popular/">
+                            <i class="fas fa-fire me-2"></i>Popular
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/friends-network/">
+                            <i class="fas fa-users me-2"></i>Friends Network
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="page-header fade-in">
+                <h1 class="page-title">
+                    <i class="fas fa-users me-2"></i>Your Friends Network
+                </h1>
+                <p class="page-subtitle">Discover connections through your existing friends and expand your network</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Network Visualization Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="network-container fade-in">
+                <div class="network-header">
+                    <div class="network-title">Your Social Graph</div>
+                    <div class="network-actions">
+                        <button class="network-action-btn" id="zoomIn">
+                            <i class="fas fa-search-plus"></i> Zoom In
+                        </button>
+                        <button class="network-action-btn" id="zoomOut">
+                            <i class="fas fa-search-minus"></i> Zoom Out
+                        </button>
+                        <button class="network-action-btn" id="resetView">
+                            <i class="fas fa-sync-alt"></i> Reset
+                        </button>
+                    </div>
+                </div>
+                <div class="network-visualization" id="networkGraph">
+                    <!-- Network nodes and edges will be generated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Suggested Friends Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="friends-suggestions fade-in">
+                <div class="friends-suggestions-header">
+                    <span>Friends of Your Friends</span>
+                    <a href="/recommendations/" class="see-all-link">See All</a>
+                </div>
+                <div class="suggestions-grid">
+                    {% if user_suggestions %}
+                    {% for profile in user_suggestions %}
+                    <div class="suggestion-card">
+                        <img src="{{ profile.profile_pic.url }}" class="suggestion-avatar-lg" alt="{{ profile.user }}">
+                        <div class="suggestion-username">@{{ profile.user }}</div>
+                        
+                        <!-- Connection info -->
+                        <div class="connection-info">
+                            <small>Connected through:</small>
+                            <div class="connecting-friends">
+                                {% for connecting_profile in profile.connecting_friends_profiles %}
+                                <a href="/profile/{{ connecting_profile.user }}" title="{{ connecting_profile.user }}">
+                                    <img src="{{ connecting_profile.profile_pic.url }}" class="connecting-avatar" alt="{{ connecting_profile.user }}">
+                                </a>
+                                {% endfor %}
+                                {% if profile.connecting_friends|length > profile.connecting_friends_profiles|length %}
+                                <span class="more-friends">+{{ profile.connecting_friends|length|add:"-3" }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Mutual connections info -->
+                        {% if profile.mutual_friends > 0 %}
+                        <div class="mutual-connections">{{ profile.mutual_friends }} mutual friend{% if profile.mutual_friends > 1 %}s{% endif %}</div>
+                        <div class="mutual-avatars">
+                            {% for mutual in profile.mutual_friends_profiles %}
+                            <img src="{{ mutual.profile_pic.url }}" class="mutual-avatar" alt="{{ mutual.user }}" title="{{ mutual.user }}">
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="action-buttons">
+                            <a href="/profile/{{ profile.user }}" class="view-profile-btn">
+                                <i class="fas fa-user me-1"></i> View Profile
+                            </a>
+                            <form action="/follow" method="POST" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="follower" value="{{ user.username }}">
+                                <input type="hidden" name="user" value="{{ profile.user }}">
+                                <button type="submit" class="follow-btn-lg">
+                                    <i class="fas fa-user-plus me-1"></i> Follow
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="no-suggestions">
+                        <i class="fas fa-user-friends fa-3x mb-3"></i>
+                        <h5>No friend suggestions available</h5>
+                        <p>Follow more people to see suggestions based on your network</p>
+                        <a href="/search" class="btn btn-primary">Find People</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="text/javascript">
+    $(document).ready(function() {
+        // Apply staggered fade-in animation to elements
+        setTimeout(() => {
+            $('.fade-in').each(function(i) {
+                setTimeout(() => {
+                    $(this).css('opacity', '1');
+                    $(this).css('transform', 'translateY(0)');
+                }, i * 120);
+            });
+        }, 300);
+        
+        // Generate network visualization
+        function generateNetwork() {
+            const container = document.getElementById('networkGraph');
+            const centerX = container.clientWidth / 2;
+            const centerY = container.clientHeight / 2;
+            
+            // Create center node (current user)
+            const centerNode = document.createElement('div');
+            centerNode.className = 'network-node center-node';
+            centerNode.style.left = `${centerX}px`;
+            centerNode.style.top = `${centerY}px`;
+            
+            const centerAvatar = document.createElement('img');
+            centerAvatar.className = 'network-node-avatar';
+            centerAvatar.src = "{{ user_profile.profile_pic.url }}";
+            centerAvatar.alt = "You";
+            
+            const centerName = document.createElement('div');
+            centerName.className = 'network-node-name';
+            centerName.textContent = 'You';
+            
+            centerNode.appendChild(centerAvatar);
+            centerNode.appendChild(centerName);
+            container.appendChild(centerNode);
+            
+            // Create surrounding nodes (friends)
+            const profiles = [
+                {% for profile in followed_profiles %}
+                {
+                    username: "{{ profile.user }}",
+                    profilePic: "{{ profile.profile_pic.url }}",
+                    isMutual: {% if profile.user in mutual_connections %}true{% else %}false{% endif %}
+                }{% if not forloop.last %},{% endif %}
+                {% empty %}
+                {
+                    username: "example_user",
+                    profilePic: "{% static 'assets/images/profile-placeholder.jpg' %}",
+                    isMutual: false
+                }
+                {% endfor %}
+            ];
+            
+            // Take up to 8 connections to display
+            const nodeCount = Math.min(profiles.length, 8);
+            const radius = 120;
+            
+            for (let i = 0; i < nodeCount; i++) {
+                const angle = (i * 2 * Math.PI / nodeCount);
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+                
+                // Create node
+                const node = document.createElement('div');
+                node.className = 'network-node';
+                node.style.left = `${x}px`;
+                node.style.top = `${y}px`;
+                
+                const avatar = document.createElement('img');
+                avatar.className = 'network-node-avatar';
+                avatar.src = profiles[i].profilePic;
+                avatar.alt = profiles[i].username;
+                
+                const name = document.createElement('div');
+                name.className = 'network-node-name';
+                name.textContent = `@${profiles[i].username}`;
+                
+                node.appendChild(avatar);
+                node.appendChild(name);
+                container.appendChild(node);
+                
+                // Make the node clickable to go to profile
+                node.onclick = function() {
+                    window.location.href = `/profile/${profiles[i].username}`;
+                };
+                
+                // Create edge to center
+                const edge = document.createElement('div');
+                edge.className = 'network-edge';
+                
+                // If mutual connection, style differently
+                if (profiles[i].isMutual) {
+                    edge.classList.add('mutual');
+                }
+                
+                // Calculate angle and length for the edge
+                const dx = x - centerX;
+                const dy = y - centerY;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const angleDeg = Math.atan2(dy, dx) * 180 / Math.PI;
+                
+                edge.style.width = `${length}px`;
+                edge.style.left = `${centerX}px`;
+                edge.style.top = `${centerY}px`;
+                edge.style.transform = `rotate(${angleDeg}deg)`;
+                
+                container.appendChild(edge);
+            }
+            
+            // Add connections between mutual friends (if we have enough mutual connections)
+            const mutualProfiles = profiles.filter(p => p.isMutual);
+            let connectionCount = Math.min(5, Math.floor(mutualProfiles.length / 2));
+            
+            for (let i = 0; i < connectionCount; i++) {
+                const startIdx = i;
+                const endIdx = (i + 1) % mutualProfiles.length;
+                
+                // Use different angles for mutual profiles
+                const startAngle = (startIdx * 2 * Math.PI / nodeCount);
+                const endAngle = (endIdx * 2 * Math.PI / nodeCount);
+                
+                const startX = centerX + radius * Math.cos(startAngle);
+                const startY = centerY + radius * Math.sin(startAngle);
+                const endX = centerX + radius * Math.cos(endAngle);
+                const endY = centerY + radius * Math.sin(endAngle);
+                
+                const edge = document.createElement('div');
+                edge.className = 'network-edge mutual';
+                
+                // Calculate angle and length for the edge
+                const dx = endX - startX;
+                const dy = endY - startY;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const angleDeg = Math.atan2(dy, dx) * 180 / Math.PI;
+                
+                edge.style.width = `${length}px`;
+                edge.style.left = `${startX}px`;
+                edge.style.top = `${startY}px`;
+                edge.style.transform = `rotate(${angleDeg}deg)`;
+                
+                container.appendChild(edge);
+            }
+        }
+        
+        // Initialize network visualization
+        generateNetwork();
+        
+        // Zoom functionality
+        let scale = 1;
+        const networkGraph = $('#networkGraph');
+        
+        $('#zoomIn').click(function() {
+            if (scale < 1.5) {
+                scale += 0.1;
+                networkGraph.css('transform', `scale(${scale})`);
+            }
+        });
+        
+        $('#zoomOut').click(function() {
+            if (scale > 0.5) {
+                scale -= 0.1;
+                networkGraph.css('transform', `scale(${scale})`);
+            }
+        });
+        
+        $('#resetView').click(function() {
+            scale = 1;
+            networkGraph.css('transform', 'scale(1)');
+        });
+        
+        // Follow button functionality
+        $('.follow-btn-lg').click(function() {
+            const button = $(this);
+            if (button.text() === 'Follow') {
+                button.text('Following');
+                button.css('background-color', 'var(--success-color)');
+            } else {
+                button.text('Follow');
+                button.css('background-color', 'var(--primary-color)');
+            }
+        });
+        
+        // Force light mode
+        localStorage.setItem('theme', 'light');
+        $('body').removeClass('dark-mode');
+    });
+</script>
+{% endblock %} 

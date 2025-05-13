@@ -128,10 +128,19 @@ $('.notification-box > ul li > i.del').on("click", function(){
 $('#nightmode').on('change', function() {
     if ($(this).is(':checked')) {
         // Show popup window
-        $(".theme-layout").addClass('black');	
+        $(".theme-layout").addClass('black');
     }
-	else {
+    else {
         $(".theme-layout").removeClass("black");
+    }
+});
+
+// Force light mode by default
+$(".theme-layout").removeClass("black");
+$(document).ready(function() {
+    // Uncheck nightmode checkbox if it exists
+    if ($("#nightmode").length) {
+        $("#nightmode").prop('checked', false);
     }
 });
 

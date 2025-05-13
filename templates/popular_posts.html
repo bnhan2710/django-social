@@ -23,17 +23,38 @@
         transition: var(--transition);
         background-color: var(--card-bg);
         border: none;
+        position: relative;
     }
 
     .popular-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px var(--shadow-color);
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px var(--shadow-color);
     }
     
     .grid-layout {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 20px;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 25px;
+    }
+    
+    .popular-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background-color: rgba(224, 36, 94, 0.9);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        z-index: 10;
+    }
+    
+    .popular-badge i {
+        margin-right: 5px;
     }
 
     .post-header {
@@ -44,12 +65,18 @@
     }
 
     .post-avatar {
-        width: 45px;
-        height: 45px;
+        width: 48px;
+        height: 48px;
         border-radius: 50%;
         object-fit: cover;
         margin-right: 12px;
         border: 2px solid var(--border-color);
+        box-shadow: 0 2px 5px var(--shadow-color);
+        transition: var(--transition);
+    }
+    
+    .post-avatar:hover {
+        transform: scale(1.05);
     }
 
     .post-user-info h6 {
@@ -66,8 +93,14 @@
     .post-popularity {
         font-size: 0.8rem;
         color: #e0245e;
-        margin-top: 2px;
+        margin-top: 5px;
         font-weight: 500;
+        display: flex;
+        align-items: center;
+    }
+    
+    .post-popularity i {
+        margin-right: 5px;
     }
 
     .post-options {
@@ -93,17 +126,17 @@
 
     .post-image img {
         width: 100%;
-        height: 250px;
+        height: 280px;
         transition: var(--transition);
         object-fit: cover;
     }
 
     .post-image:hover img {
-        transform: scale(1.02);
+        transform: scale(1.05);
     }
 
     .post-actions {
-        padding: 10px 15px;
+        padding: 12px 15px;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -125,12 +158,13 @@
     }
 
     .action-btn i {
-        margin-right: 6px;
+        margin-right: 8px;
         font-size: 1.1rem;
     }
 
     .action-btn:hover {
         background-color: var(--hover-bg);
+        transform: translateY(-2px);
     }
 
     .like-button.liked i {
@@ -145,6 +179,7 @@
         font-size: 0.95rem;
         margin-bottom: 10px;
         word-break: break-word;
+        line-height: 1.4;
     }
 
     .post-likes {
@@ -276,6 +311,11 @@
                             <i class="fas fa-fire me-2"></i>Popular
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/friends-network/">
+                            <i class="fas fa-users me-2"></i>Friends Network
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -300,6 +340,11 @@
                 <div class="grid-layout">
                     {% for post in most_liked_posts %}
                     <div class="popular-card fade-in">
+                        <!-- Popular Badge -->
+                        <div class="popular-badge">
+                            <i class="fas fa-fire"></i> Popular
+                        </div>
+                        
                         <!-- Post Header -->
                         <div class="post-header">
                             <a href="/profile/{{post.user}}" class="d-flex align-items-center text-decoration-none">
@@ -308,7 +353,7 @@
                                     <h6 class="mb-0">@{{post.user}}</h6>
                                     <span class="post-time">{{ post.created_at|date:"F d, Y" }}</span>
                                     <div class="post-popularity">
-                                        <i class="fas fa-fire"></i> {{post.no_of_likes}} likes
+                                        <i class="fas fa-heart"></i> {{post.no_of_likes}} likes
                                     </div>
                                 </div>
                             </a>
@@ -330,7 +375,7 @@
                                     <i class="{% if post.id in liked_posts %}fas{% else %}far{% endif %} fa-heart"></i> Like
                                 </a>
                                 <a href="/post/{{post.id}}" class="action-btn">
-                                    <i class="far fa-comment"></i> Comment
+                                    <i class="far fa-eye"></i> View Post
                                 </a>
                             </div>
                             <div>
@@ -347,6 +392,7 @@
                             <p class="post-caption">
                                 {% if post.caption|length > 100 %}
                                     {{ post.caption|slice:":100" }}...
+                                    <a href="/post/{{post.id}}" class="text-primary">Read more</a>
                                 {% else %}
                                     {{ post.caption }}
                                 {% endif %}
@@ -363,27 +409,6 @@
                                 <span class="like-mess">Liked by <strong>{{post.no_of_likes}}</strong> people</span>
                                 {% endif %}
                             </div>
-                            
-                            <!-- Comments -->
-                            {% if post.post_comments %}
-                            <div class="comment-section">
-                                {% for comment in post.post_comments %}
-                                <div class="comment-item">
-                                    <div class="comment-bubble">
-                                        <span class="comment-user">@{{comment.user}}</span>
-                                        <span class="comment-text">{{comment.comment}}</span>
-                                    </div>
-                                </div>
-                                <div class="comment-meta">
-                                    {{comment.created_at|date:"M d"}} • Like • Reply
-                                </div>
-                                {% endfor %}
-                                
-                                {% if post.count_comments > post.post_comments|length %}
-                                <a href="/post/{{post.id}}" class="view-comments">View all {{post.count_comments}} comments</a>
-                                {% endif %}
-                            </div>
-                            {% endif %}
                         </div>
                     </div>
                     {% endfor %}
@@ -406,15 +431,25 @@
 {% block extra_js %}
 <script type="text/javascript">
     $(document).ready(function() {
-        // Apply fade-in animation to elements
+        // Apply staggered fade-in animation to elements
         setTimeout(() => {
             $('.fade-in').each(function(i) {
                 setTimeout(() => {
                     $(this).css('opacity', '1');
                     $(this).css('transform', 'translateY(0)');
-                }, i * 100);
+                }, i * 120); // Slightly slower for more pleasing effect
             });
         }, 300);
+        
+        // Add subtle hover effect on cards
+        $('.popular-card').hover(
+            function() {
+                $(this).find('.popular-badge').css('transform', 'scale(1.05)');
+            }, 
+            function() {
+                $(this).find('.popular-badge').css('transform', 'scale(1)');
+            }
+        );
         
         // Like button functionality
         $('.like-button').click(function() {
@@ -440,12 +475,16 @@
                     }
                     
                     // Update popularity indicator
-                    popularityElement.html('<i class="fas fa-fire"></i> ' + data.likes + ' likes');
+                    popularityElement.html('<i class="fas fa-heart"></i> ' + data.likes + ' likes');
                     
-                    // Toggle heart icon and button class
+                    // Toggle heart icon and button class with animation
                     if (data.status === 'liked') {
                         heartIcon.removeClass('far').addClass('fas');
                         $('.like-button[data-catid="' + catid + '"]').addClass('liked');
+                        heartIcon.css('transform', 'scale(1.2)');
+                        setTimeout(() => {
+                            heartIcon.css('transform', 'scale(1)');
+                        }, 200);
                     } else {
                         heartIcon.removeClass('fas').addClass('far');
                         $('.like-button[data-catid="' + catid + '"]').removeClass('liked');

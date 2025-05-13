@@ -27,6 +27,7 @@
         transition: var(--transition);
         background-color: white;
         border: none;
+        position: relative;
     }
 
     .dark-mode .recommendation-card {
@@ -35,12 +36,12 @@
     }
 
     .recommendation-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
     }
 
     .dark-mode .recommendation-card:hover {
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
     }
 
     .post-header {
@@ -55,16 +56,23 @@
     }
 
     .post-avatar {
-        width: 45px;
-        height: 45px;
+        width: 48px;
+        height: 48px;
         border-radius: 50%;
         object-fit: cover;
         margin-right: 12px;
         border: 2px solid #f0f2f5;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        transition: var(--transition);
     }
 
     .dark-mode .post-avatar {
         border-color: #3a3b3c;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+    
+    .post-avatar:hover {
+        transform: scale(1.05);
     }
 
     .post-user-info h6 {
@@ -86,19 +94,40 @@
     .connections {
         font-size: 0.8rem;
         color: #65676b;
-        margin-top: 2px;
+        margin-top: 5px;
+        padding: 3px 0;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
     }
     
     .dark-mode .connections {
         color: #b0b3b8;
     }
     
+    .connections-icon {
+        margin-right: 4px;
+        color: var(--primary-color);
+        font-size: 0.9rem;
+    }
+    
+    .dark-mode .connections-icon {
+        color: var(--success-color);
+    }
+    
     .connections a {
         color: var(--primary-color);
+        margin: 0 2px;
+        transition: var(--transition);
+        font-weight: 500;
     }
     
     .dark-mode .connections a {
         color: var(--success-color);
+    }
+    
+    .connections a:hover {
+        text-decoration: underline;
     }
 
     .post-options {
@@ -131,14 +160,15 @@
         transition: var(--transition);
         object-fit: cover;
         max-height: 500px;
+        min-height: 250px;
     }
 
     .post-image:hover img {
-        transform: scale(1.02);
+        transform: scale(1.03);
     }
 
     .post-actions {
-        padding: 10px 15px;
+        padding: 12px 15px;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -168,12 +198,13 @@
     }
 
     .action-btn i {
-        margin-right: 6px;
+        margin-right: 8px;
         font-size: 1.1rem;
     }
 
     .action-btn:hover {
         background-color: #f0f2f5;
+        transform: translateY(-2px);
     }
 
     .dark-mode .action-btn:hover {
@@ -491,7 +522,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#friends-network" id="friends-network-tab">
+                        <a class="nav-link" href="/friends-network/">
                             <i class="fas fa-users me-2"></i>Friends Network
                         </a>
                     </li>
@@ -526,6 +557,7 @@
                                 <h6 class="mb-0">@{{post.user}}</h6>
                                 <span class="post-time">{{ post.created_at|date:"F d, Y" }}</span>
                                 <div class="connections">
+                                    <i class="fas fa-user-friends connections-icon"></i>
                                     Connected via: 
                                     {% for connection in post.connections %}
                                         <a href="/profile/{{connection}}" class="text-decoration-none">@{{connection}}</a>{% if not forloop.last %}, {% endif %}
@@ -675,15 +707,25 @@
 {% block extra_js %}
 <script type="text/javascript">
     $(document).ready(function() {
-        // Apply fade-in animation to elements
+        // Apply staggered fade-in animation to elements
         setTimeout(() => {
             $('.fade-in').each(function(i) {
                 setTimeout(() => {
                     $(this).css('opacity', '1');
                     $(this).css('transform', 'translateY(0)');
-                }, i * 100);
+                }, i * 120); // Slightly slower for more pleasing effect
             });
         }, 300);
+        
+        // Add hover animations for connection links
+        $('.connections a').hover(
+            function() {
+                $(this).css('color', '#7209b7');
+            },
+            function() {
+                $(this).css('color', '');
+            }
+        );
         
         // Like button functionality
         $('.like-button').click(function() {
@@ -707,10 +749,14 @@
                         likeMessElement.text("Liked by " + data.likes + " people");
                     }
                     
-                    // Toggle heart icon and button class
+                    // Toggle heart icon and button class with animation
                     if (data.status === 'liked') {
                         heartIcon.removeClass('far').addClass('fas');
                         $('.like-button[data-catid="' + catid + '"]').addClass('liked');
+                        heartIcon.css('transform', 'scale(1.2)');
+                        setTimeout(() => {
+                            heartIcon.css('transform', 'scale(1)');
+                        }, 200);
                     } else {
                         heartIcon.removeClass('fas').addClass('far');
                         $('.like-button[data-catid="' + catid + '"]').removeClass('liked');
@@ -727,11 +773,9 @@
             }, 500);
         });
         
-        // Check if there's a theme preference in localStorage
-        const currentTheme = localStorage.getItem('theme');
-        if (currentTheme === 'dark') {
-            $('body').addClass('dark-mode');
-        }
+        // Force light mode
+        localStorage.setItem('theme', 'light');
+        $('body').removeClass('dark-mode');
     });
 </script>
 {% endblock %}

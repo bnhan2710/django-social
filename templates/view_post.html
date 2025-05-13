@@ -366,11 +366,9 @@
             });
         });
         
-        // Check if there's a theme preference in localStorage
-        const currentTheme = localStorage.getItem('theme');
-        if (currentTheme === 'dark') {
-            $('body').addClass('dark-mode');
-        }
+        // Force light mode
+        localStorage.setItem('theme', 'light');
+        $('body').removeClass('dark-mode');
     });
 </script>
 {% endblock %}
