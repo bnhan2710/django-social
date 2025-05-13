@@ -1,145 +1,376 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block extra_css %}
+<style>
+    /* View post page specific styling */
+    .post-card {
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: var(--box-shadow);
+        margin: 30px auto;
+        transition: var(--transition);
+        background-color: white;
+        border: none;
+        max-width: 800px;
+    }
+
+    .dark-mode .post-card {
+        background-color: #242526;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .post-header {
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #f0f2f5;
+    }
+
+    .dark-mode .post-header {
+        border-bottom: 1px solid #3a3b3c;
+    }
+
+    .author-info {
+        display: flex;
+        align-items: center;
+    }
+
+    .post-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #f0f2f5;
+    }
+
+    .dark-mode .post-avatar {
+        border-color: #3a3b3c;
+    }
+
+    .post-username {
+        margin-left: 12px;
+        font-weight: 600;
+        color: inherit;
+    }
+
+    .dark-mode .post-username {
+        color: #e4e6eb;
+    }
+
+    .post-options {
+        color: #65676b;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .dark-mode .post-options {
+        color: #b0b3b8;
+    }
+
+    .post-options:hover {
+        color: var(--primary-color);
+    }
+
+    .dark-mode .post-options:hover {
+        color: var(--success-color);
+    }
+
+    .post-image-container {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .post-image {
+        width: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .post-actions {
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        border-top: 1px solid #f0f2f5;
+    }
+
+    .dark-mode .post-actions {
+        border-color: #3a3b3c;
+    }
+
+    .action-icon {
+        font-size: 1.25rem;
+        color: #65676b;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .dark-mode .action-icon {
+        color: #b0b3b8;
+    }
+
+    .action-icon:hover {
+        transform: scale(1.1);
+    }
+
+    .like-button .action-icon:hover {
+        color: #e0245e;
+    }
+
+    .liked .action-icon {
+        color: #e0245e !important;
+    }
+
+    .post-likes {
+        font-size: 0.85rem;
+        color: #65676b;
+        font-weight: 500;
+        margin: 5px 0 10px 16px;
+    }
+
+    .dark-mode .post-likes {
+        color: #b0b3b8;
+    }
+
+    .post-content {
+        padding: 0 16px;
+    }
+
+    .post-caption {
+        font-size: 0.95rem;
+        margin-bottom: 15px;
+        word-break: break-word;
+        line-height: 1.5;
+    }
+
+    .dark-mode .post-caption {
+        color: #e4e6eb;
+    }
+
+    .comments-section {
+        padding: 10px 16px;
+        margin-top: 10px;
+        border-top: 1px solid #f0f2f5;
+    }
+
+    .dark-mode .comments-section {
+        border-color: #3a3b3c;
+    }
+
+    .comment-item {
+        margin-bottom: 12px;
+    }
+
+    .comment-content {
+        display: flex;
+    }
+
+    .comment-bubble {
+        background-color: #f0f2f5;
+        border-radius: 18px;
+        padding: 8px 12px;
+        font-size: 0.9rem;
+        margin-bottom: 3px;
+    }
+
+    .dark-mode .comment-bubble {
+        background-color: #3a3b3c;
+        color: #e4e6eb;
+    }
+
+    .comment-user {
+        font-weight: 600;
+        margin-right: 5px;
+    }
+
+    .comment-text {
+        word-break: break-word;
+    }
+
+    .comment-time {
+        font-size: 0.75rem;
+        color: #65676b;
+        margin-left: 12px;
+    }
+
+    .dark-mode .comment-time {
+        color: #b0b3b8;
+    }
+
+    .comment-form {
+        padding: 12px 16px;
+        border-top: 1px solid #f0f2f5;
+        margin-top: 10px;
+    }
+
+    .dark-mode .comment-form {
+        border-color: #3a3b3c;
+    }
+
+    .comment-input {
+        border: none;
+        border-radius: 20px;
+        padding: 10px 15px;
+        background-color: #f0f2f5;
+        width: 100%;
+        transition: var(--transition);
+    }
+
+    .dark-mode .comment-input {
+        background-color: #3a3b3c;
+        color: #e4e6eb;
+    }
+
+    .comment-input:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px var(--primary-color);
+    }
+
+    .dark-mode .comment-input:focus {
+        box-shadow: 0 0 0 2px var(--success-color);
+    }
+
+    .comment-submit {
+        background: none;
+        border: none;
+        color: var(--primary-color);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .dark-mode .comment-submit {
+        color: var(--success-color);
+    }
+
+    .comment-submit:hover {
+        color: var(--secondary-color);
+        transform: translateX(2px);
+    }
+
+    .dark-mode .comment-submit:hover {
+        color: var(--info-color);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="post my-5">
-    <div class="card" style="margin:auto ; width:800px;">
-        <div class="card-body">
-            <div class="container">
-                <!-- Author -->
-                <div class="row">
-                    <div class="col-md-8 ">
-                        <div class="d-flex story ">
-                            <img src="{{user_profile.profile_pic.url}}" class="rounded-circle" height="40" width="40"
-                                alt="Avatar" />
-                            <div class="mt-2 mx-2">
-                                <a href="/profile/{{user_profile.user}}" class="text-dark">
-                                    <strong class="">@{{post.user}}</strong>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 ">
-                        <div class="d-flex float-end">
-                            <div class="dropdown">
-                                <a class="text-reset me-3 dropdown-toggle hidden-arrow" href="#"
-                                    id="navbarDropdownMenuLink" role="button" data-mdb-toggle="dropdown"
-                                    aria-expanded="false">
-                                    <i class="fas fa-ellipsis-h mt-3"></i>
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
-                                    <li>
-                                        <a class="dropdown-item" href="{% url 'delete_event' post.id %}">Delete</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
+    <div class="post-card">
+        <div class="post-header">
+            <div class="author-info">
+                <img src="{{user_profile.profile_pic.url}}" class="post-avatar" alt="Avatar" />
+                <a href="/profile/{{user_profile.user}}" class="post-username">
+                    @{{post.user}}
+                </a>
+            </div>
+            <div class="post-options">
+                <div class="dropdown">
+                    <a class="text-reset dropdown-toggle hidden-arrow" href="#"
+                        id="navbarDropdownMenuLink" role="button" data-mdb-toggle="dropdown"
+                        aria-expanded="false">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+                        <li>
+                            <a class="dropdown-item" href="{% url 'delete_event' post.id %}">Delete</a>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
-        <!-- Photos -->
+        
         {% if post.image %}
-        <div class="bg-image hover-overlay ripple shadow-1-strong rounded-0" data-ripple-color="light">
-            <img src="{{post.image.url}}" class="w-100" />
+        <div class="post-image-container">
+            <img src="{{post.image.url}}" class="post-image" alt="Post image" />
         </div>
         {% endif %}
 
-        <!-- Interaction -->
-        <div class="card-body">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-8">
-                        <a id="like{{post.id}}" data-catid="{{post.id}}" class="like-button">
-                            <i class="far fa-heart fa-lg ml-0"></i>
-                        </a>
-                        <i class="far fa-comment fa-lg mx-3"></i>
-                        <i class="far fa-paper-plane fa-lg"></i>
-                    </div>
-                </div>
-                <!-- Liked by -->
-                <div class="row mt-1">
-                    <div class="col-md-8 mt-1">
-                        {% if post.no_of_likes == 0 %}
-                        <small class="like-mess"> No likes yet</small>
-                        {% elif post.no_of_likes == 1 %}
-                        <small class="like-mess"> Liked by <strong>{{post.no_of_likes}}</strong>
-                            person</small>
-                        {% else %}
-                        <small class="like-mess"> Liked by <strong>{{post.no_of_likes}}</strong>
-                            people</small>
-                        {% endif %}
-                    </div>
-                </div>
-                <!-- Description -->
-                <div class="row">
-                    <div class="col-md-12 mt-1">
-                        <p class="mb-0">
-                            <small>{{post.caption}}
-                            </small>
-                        </p>
-                    </div>
-                </div>
-                <!-- Comments -->
-                <div class="row">
-                    {% for comment in post.comments.all %}
-                    <small>
-                        <p class="my-1"><strong class="text-dark">{{comment.user}}</strong> {{comment.comment}}</p>
-                    </small>
-                    <small style="color: #8E8E8E;">{{comment.created_at}}</small>
-
-                    {% endfor %}
-                </div>
-
-                <!-- Comment form -->
-                <div class="row">
-                    <form method="post" action="">
-                        {% csrf_token %}
-                        <hr />
-                        <div class="col-md-11">
-                            <div class="form-outline">
-                                <input type="text" name="comment" id="form12" class="form-control"
-                                    placeholder="Leave a comment..." />
-                            </div>
-                        </div>
-                        <div class="col-md-1">
-                            <input type="submit" class="text-info mt-1 text-end" value="Send">
-                        </div>
-                    </form>
-
-                </div>
-            </div>
+        <div class="post-actions">
+            <a id="like{{post.id}}" data-catid="{{post.id}}" class="like-button">
+                <i class="far fa-heart action-icon"></i>
+            </a>
+            <i class="far fa-comment action-icon"></i>
+            <i class="far fa-paper-plane action-icon"></i>
         </div>
+        
+        <div class="post-likes">
+            {% if post.no_of_likes == 0 %}
+            <span class="like-mess">No likes yet</span>
+            {% elif post.no_of_likes == 1 %}
+            <span class="like-mess">Liked by <strong>{{post.no_of_likes}}</strong> person</span>
+            {% else %}
+            <span class="like-mess">Liked by <strong>{{post.no_of_likes}}</strong> people</span>
+            {% endif %}
+        </div>
+        
+        <div class="post-content">
+            <p class="post-caption">{{post.caption}}</p>
+        </div>
+        
+        <div class="comments-section">
+            {% for comment in post.comments.all %}
+            <div class="comment-item">
+                <div class="comment-content">
+                    <div class="comment-bubble">
+                        <span class="comment-user">{{comment.user}}</span>
+                        <span class="comment-text">{{comment.comment}}</span>
+                    </div>
+                </div>
+                <span class="comment-time">{{comment.created_at}}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <form method="post" action="" class="comment-form d-flex align-items-center">
+            {% csrf_token %}
+            <input type="text" name="comment" class="comment-input" placeholder="Leave a comment..." />
+            <button type="submit" class="comment-submit ms-2">Post</button>
+        </form>
     </div>
 </div>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
 
+{% endblock %}
+
+{% block extra_js %}
 <script type="text/javascript">
-    $('.like-button').click(function () {
-        var catid;
-        catid = $(this).attr("data-catid");
-        var likeMessElement = $(this).closest('.card-body').find('.like-mess');
-        
-        $.ajax(
-            {
+    $(document).ready(function() {
+        // Like button functionality
+        $('.like-button').click(function() {
+            var catid = $(this).attr("data-catid");
+            var likeMessElement = $(this).closest('.post-card').find('.like-mess');
+            var heartIcon = $(this).find('i');
+            
+            $.ajax({
                 type: "GET",
                 url: "/like-post",
                 data: {
                     post_id: catid
                 },
-                success: function (data) {
+                success: function(data) {
+                    // Update like count message
                     if (data == 0) {
                         likeMessElement.text("No likes yet");
-                    }
-                    else if (data == 1) {
+                    } else if (data == 1) {
                         likeMessElement.text("Liked by " + data + " person");
-                    }
-                    else {
+                    } else {
                         likeMessElement.text("Liked by " + data + " people");
                     }
+                    
+                    // Toggle heart icon
+                    heartIcon.toggleClass('far fas');
+                    $(this).toggleClass('liked');
                 }
-            })
+            });
+        });
+        
+        // Check if there's a theme preference in localStorage
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme === 'dark') {
+            $('body').addClass('dark-mode');
+        }
     });
 </script>
 {% endblock %}

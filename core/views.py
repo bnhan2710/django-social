@@ -81,11 +81,49 @@ def index(request):
     user_likes = LikePost.objects.filter(username=request.user.username).values_list('post_id', flat=True)
     liked_posts = list(user_likes)
     
+    # Get most liked posts - excluding user's own posts and already followed users' posts
+    most_liked_posts = Post.objects.exclude(user=request.user.username).exclude(
+        user__in=[user for user in user_following_list if isinstance(user, str)]
+    ).order_by('-no_of_likes')[:5]
+    
+    # Process most liked posts to add profile pic
+    for post in most_liked_posts:
+        user_obj = User.objects.get(username=post.user)
+        post.img = Profile.objects.get(user=user_obj).profile_pic.url
+        post.post_comments = Comment.objects.filter(post=post).order_by('-created_at')[0:1]
+        post.count_comments = Comment.objects.filter(post=post).count()
+    
+    # Get friends of friends posts
+    friends_of_friends_posts = []
+    # Get users followed by users that the current user follows
+    for followed_user in user_following:
+        fof_following = FollowersCount.objects.filter(follower=followed_user.user)
+        for fof in fof_following:
+            # Skip if it's the current user or someone they already follow
+            if fof.user == request.user.username or fof.user in [u.user for u in user_following]:
+                continue
+                
+            # Get posts from this friend of friend
+            fof_posts = Post.objects.filter(user=fof.user).order_by('-created_at')
+            
+            for post in fof_posts:
+                user_obj = User.objects.get(username=post.user)
+                post.img = Profile.objects.get(user=user_obj).profile_pic.url
+                post.post_comments = Comment.objects.filter(post=post).order_by('-created_at')[0:1]
+                post.count_comments = Comment.objects.filter(post=post).count()
+                post.fof_connection = followed_user.user  # Track who connects them
+                friends_of_friends_posts.append(post)
+    
+    # Take most recent 5 posts
+    friends_of_friends_posts = friends_of_friends_posts[:5]
+    
     context = {
         'user_profile': user_profile,
         'posts': feed,
         'usersuggest_profile_list': usersuggest_profile_list[:4],
-        'liked_posts': liked_posts
+        'liked_posts': liked_posts,
+        'most_liked_posts': most_liked_posts,
+        'friends_of_friends_posts': friends_of_friends_posts
     }
     
     return render(request, 'index.html', context)
@@ -398,3 +436,111 @@ def edit_post(request, pk):
         'post': post
     }
     return render(request, 'edit_post.html', context)
+
+
+@login_required(login_url='signin')
+def recommendations(request):
+    user_object = User.objects.get(username=request.user.username)
+    user_profile = Profile.objects.get(user=user_object)
+    
+    # Get users that the current user follows
+    user_following = FollowersCount.objects.filter(follower=request.user.username)
+    following_usernames = [user.user for user in user_following]
+    
+    # Dictionary to keep track of friends of friends posts and their connections
+    fof_posts_dict = {}
+    
+    # Get friends of friends posts
+    for followed_username in following_usernames:
+        # Find who your friends follow (friends of friends)
+        fof_following = FollowersCount.objects.filter(follower=followed_username)
+        
+        for fof in fof_following:
+            # Skip if it's the current user or someone they already follow
+            if fof.user == request.user.username or fof.user in following_usernames:
+                continue
+            
+            # Get posts from this friend of friend
+            fof_posts = Post.objects.filter(user=fof.user).order_by('-created_at')
+            
+            for post in fof_posts:
+                # If we haven't processed this post yet
+                if str(post.id) not in fof_posts_dict:
+                    user_obj = User.objects.get(username=post.user)
+                    post.img = Profile.objects.get(user=user_obj).profile_pic.url
+                    post.post_comments = Comment.objects.filter(post=post).order_by('-created_at')[:3]
+                    post.count_comments = Comment.objects.filter(post=post).count()
+                    
+                    # Keep track of all connections that lead to this post
+                    post.connections = [followed_username]
+                    fof_posts_dict[str(post.id)] = post
+                else:
+                    # Add another connection path if this is a different friend connecting to the same post
+                    if followed_username not in fof_posts_dict[str(post.id)].connections:
+                        fof_posts_dict[str(post.id)].connections.append(followed_username)
+    
+    # Convert dictionary to list
+    friends_of_friends_posts = list(fof_posts_dict.values())
+    
+    # Sort by created_at (most recent first)
+    friends_of_friends_posts.sort(key=lambda x: x.created_at, reverse=True)
+    
+    # Get most liked posts (popular content)
+    most_liked_posts = Post.objects.exclude(user=request.user.username).exclude(
+        user__in=following_usernames
+    ).order_by('-no_of_likes')[:10]
+    
+    # Process most liked posts to add profile pic and other details
+    for post in most_liked_posts:
+        user_obj = User.objects.get(username=post.user)
+        post.img = Profile.objects.get(user=user_obj).profile_pic.url
+        post.post_comments = Comment.objects.filter(post=post).order_by('-created_at')[:3]
+        post.count_comments = Comment.objects.filter(post=post).count()
+    
+    # Get posts that the current user has liked
+    user_likes = LikePost.objects.filter(username=request.user.username).values_list('post_id', flat=True)
+    liked_posts = list(user_likes)
+    
+    context = {
+        'user_profile': user_profile,
+        'friends_of_friends_posts': friends_of_friends_posts,
+        'most_liked_posts': most_liked_posts,
+        'liked_posts': liked_posts,
+    }
+    
+    return render(request, 'recommendations.html', context)
+
+
+@login_required(login_url='signin')
+def popular_posts(request):
+    user_object = User.objects.get(username=request.user.username)
+    user_profile = Profile.objects.get(user=user_object)
+    
+    # Get users that the current user follows
+    user_following = FollowersCount.objects.filter(follower=request.user.username)
+    following_usernames = [user.user for user in user_following]
+    
+    # Get most liked posts (excluding user's own posts and followed users' posts)
+    most_liked_posts = Post.objects.exclude(user=request.user.username).exclude(
+        user__in=following_usernames
+    ).order_by('-no_of_likes')[:20]  # Show more posts on the dedicated page
+    
+    # Process posts to add profile pic and other details
+    for post in most_liked_posts:
+        user_obj = User.objects.get(username=post.user)
+        post.img = Profile.objects.get(user=user_obj).profile_pic.url
+        post.post_comments = Comment.objects.filter(post=post).order_by('-created_at')[:3]
+        post.count_comments = Comment.objects.filter(post=post).count()
+    
+    # Get posts that the current user has liked
+    user_likes = LikePost.objects.filter(username=request.user.username).values_list('post_id', flat=True)
+    liked_posts = list(user_likes)
+    
+    context = {
+        'user_profile': user_profile,
+        'most_liked_posts': most_liked_posts,
+        'liked_posts': liked_posts,
+        'main_profile': user_profile,  # For the navbar profile picture
+    }
+    
+    return render(request, 'popular_posts.html', context)

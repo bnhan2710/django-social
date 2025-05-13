@@ -1,0 +1,458 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Popular Posts - SoundWave{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Popular posts page specific styling */
+    .navigation-tabs {
+        margin-bottom: 25px;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        background-color: var(--card-bg);
+        box-shadow: var(--box-shadow);
+        transition: var(--transition);
+    }
+    
+    .popular-card {
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: var(--box-shadow);
+        margin-bottom: 25px;
+        transition: var(--transition);
+        background-color: var(--card-bg);
+        border: none;
+    }
+
+    .popular-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px var(--shadow-color);
+    }
+    
+    .grid-layout {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .post-header {
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .post-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 12px;
+        border: 2px solid var(--border-color);
+    }
+
+    .post-user-info h6 {
+        margin-bottom: 2px;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .post-time {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+    
+    .post-popularity {
+        font-size: 0.8rem;
+        color: #e0245e;
+        margin-top: 2px;
+        font-weight: 500;
+    }
+
+    .post-options {
+        margin-left: auto;
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .post-options:hover {
+        background-color: var(--hover-bg);
+    }
+
+    .post-image {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .post-image img {
+        width: 100%;
+        height: 250px;
+        transition: var(--transition);
+        object-fit: cover;
+    }
+
+    .post-image:hover img {
+        transform: scale(1.02);
+    }
+
+    .post-actions {
+        padding: 10px 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-top: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .action-btn {
+        padding: 8px 15px;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: var(--transition);
+        color: var(--text-muted);
+        background-color: transparent;
+        cursor: pointer;
+    }
+
+    .action-btn i {
+        margin-right: 6px;
+        font-size: 1.1rem;
+    }
+
+    .action-btn:hover {
+        background-color: var(--hover-bg);
+    }
+
+    .like-button.liked i {
+        color: #e0245e;
+    }
+
+    .post-content {
+        padding: 15px;
+    }
+
+    .post-caption {
+        font-size: 0.95rem;
+        margin-bottom: 10px;
+        word-break: break-word;
+    }
+
+    .post-likes {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+
+    .comment-section {
+        margin-top: 10px;
+    }
+
+    .comment-item {
+        display: flex;
+        margin-bottom: 10px;
+    }
+
+    .comment-bubble {
+        background-color: var(--hover-bg);
+        border-radius: 18px;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        max-width: calc(100% - 42px);
+    }
+
+    .comment-user {
+        font-weight: 600;
+        margin-right: 5px;
+    }
+
+    .comment-text {
+        word-break: break-word;
+    }
+
+    .comment-meta {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 3px;
+        margin-left: 12px;
+    }
+
+    .view-comments {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 10px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .view-comments:hover {
+        text-decoration: underline;
+    }
+    
+    .page-header {
+        margin-bottom: 25px;
+        padding: 20px;
+        border-radius: var(--border-radius);
+        background-color: var(--card-bg);
+        box-shadow: var(--box-shadow);
+        transition: var(--transition);
+    }
+    
+    .page-title {
+        color: var(--primary-color);
+        margin-bottom: 5px;
+        font-weight: 700;
+    }
+    
+    .page-subtitle {
+        color: var(--text-muted);
+        font-size: 1rem;
+        margin-bottom: 0;
+    }
+    
+    /* Animation classes */
+    .fade-in {
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    
+    /* Empty state styling */
+    .empty-state {
+        text-align: center;
+        padding: 50px 20px;
+        background-color: var(--card-bg);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+    }
+    
+    .empty-state img {
+        max-width: 150px;
+        opacity: 0.7;
+        margin-bottom: 20px;
+    }
+    
+    .empty-state h4 {
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+    
+    .empty-state p {
+        color: var(--text-muted);
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Navigation Tabs -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="navigation-tabs">
+                <ul class="nav nav-pills nav-fill">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-stream me-2"></i>Feed
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/recommendations/">
+                            <i class="fas fa-compass me-2"></i>Recommendations
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/popular/">
+                            <i class="fas fa-fire me-2"></i>Popular
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="page-header fade-in">
+                <h1 class="page-title">
+                    <i class="fas fa-fire me-2"></i>Popular Posts
+                </h1>
+                <p class="page-subtitle">Discover the most liked content from across the platform</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Popular Posts Grid -->
+    <div class="row mb-4">
+        <div class="col-12">
+            {% if most_liked_posts %}
+                <div class="grid-layout">
+                    {% for post in most_liked_posts %}
+                    <div class="popular-card fade-in">
+                        <!-- Post Header -->
+                        <div class="post-header">
+                            <a href="/profile/{{post.user}}" class="d-flex align-items-center text-decoration-none">
+                                <img src="{{post.img}}" class="post-avatar" alt="{{post.user}}" />
+                                <div class="post-user-info">
+                                    <h6 class="mb-0">@{{post.user}}</h6>
+                                    <span class="post-time">{{ post.created_at|date:"F d, Y" }}</span>
+                                    <div class="post-popularity">
+                                        <i class="fas fa-fire"></i> {{post.no_of_likes}} likes
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <!-- Post Image -->
+                        {% if post.image %}
+                        <div class="post-image">
+                            <a href="/post/{{post.id}}">
+                                <img src="{{post.image.url}}" alt="Post" />
+                            </a>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Post Actions -->
+                        <div class="post-actions">
+                            <div>
+                                <a id="like{{post.id}}" data-catid="{{post.id}}" class="action-btn like-button {% if post.id in liked_posts %}liked{% endif %}">
+                                    <i class="{% if post.id in liked_posts %}fas{% else %}far{% endif %} fa-heart"></i> Like
+                                </a>
+                                <a href="/post/{{post.id}}" class="action-btn">
+                                    <i class="far fa-comment"></i> Comment
+                                </a>
+                            </div>
+                            <div>
+                                <a class="action-btn">
+                                    <i class="far fa-bookmark"></i> Save
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Post Content -->
+                        <div class="post-content">
+                            <!-- Caption -->
+                            {% if post.caption %}
+                            <p class="post-caption">
+                                {% if post.caption|length > 100 %}
+                                    {{ post.caption|slice:":100" }}...
+                                {% else %}
+                                    {{ post.caption }}
+                                {% endif %}
+                            </p>
+                            {% endif %}
+                            
+                            <!-- Likes -->
+                            <div class="post-likes">
+                                {% if post.no_of_likes == 0 %}
+                                <span class="like-mess">No likes yet</span>
+                                {% elif post.no_of_likes == 1 %}
+                                <span class="like-mess">Liked by <strong>{{post.no_of_likes}}</strong> person</span>
+                                {% else %}
+                                <span class="like-mess">Liked by <strong>{{post.no_of_likes}}</strong> people</span>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Comments -->
+                            {% if post.post_comments %}
+                            <div class="comment-section">
+                                {% for comment in post.post_comments %}
+                                <div class="comment-item">
+                                    <div class="comment-bubble">
+                                        <span class="comment-user">@{{comment.user}}</span>
+                                        <span class="comment-text">{{comment.comment}}</span>
+                                    </div>
+                                </div>
+                                <div class="comment-meta">
+                                    {{comment.created_at|date:"M d"}} • Like • Reply
+                                </div>
+                                {% endfor %}
+                                
+                                {% if post.count_comments > post.post_comments|length %}
+                                <a href="/post/{{post.id}}" class="view-comments">View all {{post.count_comments}} comments</a>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state fade-in">
+                    <img src="{% static 'assets/images/empty-feed.png' %}" alt="No Popular Posts" class="mb-3">
+                    <h4>No Popular Posts Yet</h4>
+                    <p>Content with the most likes will appear here</p>
+                    <a href="/" class="btn btn-primary mt-2">
+                        <i class="fas fa-stream me-2"></i>Return to Feed
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="text/javascript">
+    $(document).ready(function() {
+        // Apply fade-in animation to elements
+        setTimeout(() => {
+            $('.fade-in').each(function(i) {
+                setTimeout(() => {
+                    $(this).css('opacity', '1');
+                    $(this).css('transform', 'translateY(0)');
+                }, i * 100);
+            });
+        }, 300);
+        
+        // Like button functionality
+        $('.like-button').click(function() {
+            var catid = $(this).attr("data-catid");
+            var likeMessElement = $(this).closest('.popular-card').find('.like-mess');
+            var popularityElement = $(this).closest('.popular-card').find('.post-popularity');
+            var heartIcon = $(this).find('i');
+            
+            $.ajax({
+                type: "GET",
+                url: "/like-post",
+                data: {
+                    post_id: catid
+                },
+                success: function(data) {
+                    // Update like count message
+                    if (data.likes == 0) {
+                        likeMessElement.text("No likes yet");
+                    } else if (data.likes == 1) {
+                        likeMessElement.text("Liked by " + data.likes + " person");
+                    } else {
+                        likeMessElement.text("Liked by " + data.likes + " people");
+                    }
+                    
+                    // Update popularity indicator
+                    popularityElement.html('<i class="fas fa-fire"></i> ' + data.likes + ' likes');
+                    
+                    // Toggle heart icon and button class
+                    if (data.status === 'liked') {
+                        heartIcon.removeClass('far').addClass('fas');
+                        $('.like-button[data-catid="' + catid + '"]').addClass('liked');
+                    } else {
+                        heartIcon.removeClass('fas').addClass('far');
+                        $('.like-button[data-catid="' + catid + '"]').removeClass('liked');
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

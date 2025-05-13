@@ -18,4 +18,6 @@ urlpatterns = [
     path('messages/getmessages', views.get_messages, name='get_messages'),
     path('delete/<str:pk>', views.delete_event, name='delete_event'),
     path('edit-post/<uuid:pk>/', views.edit_post, name='edit_post'),
+    path('recommendations/', views.recommendations, name='recommendations'),
+    path('popular/', views.popular_posts, name='popular_posts'),
 ]

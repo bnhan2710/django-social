@@ -1,0 +1,737 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Recommendations - SoundWave{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Recommendations page specific styling */
+    .navigation-tabs {
+        margin-bottom: 25px;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        background-color: white;
+        box-shadow: var(--box-shadow);
+        transition: var(--transition);
+    }
+    
+    .dark-mode .navigation-tabs {
+        background-color: #242526;
+    }
+    
+    .recommendation-card {
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: var(--box-shadow);
+        margin-bottom: 25px;
+        transition: var(--transition);
+        background-color: white;
+        border: none;
+    }
+
+    .dark-mode .recommendation-card {
+        background-color: #242526;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .recommendation-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .dark-mode .recommendation-card:hover {
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .post-header {
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #f0f2f5;
+    }
+
+    .dark-mode .post-header {
+        border-bottom: 1px solid #3a3b3c;
+    }
+
+    .post-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 12px;
+        border: 2px solid #f0f2f5;
+    }
+
+    .dark-mode .post-avatar {
+        border-color: #3a3b3c;
+    }
+
+    .post-user-info h6 {
+        margin-bottom: 2px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: inherit;
+    }
+
+    .post-time {
+        font-size: 0.8rem;
+        color: #65676b;
+    }
+    
+    .dark-mode .post-time {
+        color: #b0b3b8;
+    }
+    
+    .connections {
+        font-size: 0.8rem;
+        color: #65676b;
+        margin-top: 2px;
+    }
+    
+    .dark-mode .connections {
+        color: #b0b3b8;
+    }
+    
+    .connections a {
+        color: var(--primary-color);
+    }
+    
+    .dark-mode .connections a {
+        color: var(--success-color);
+    }
+
+    .post-options {
+        margin-left: auto;
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .post-options:hover {
+        background-color: #f0f2f5;
+    }
+
+    .dark-mode .post-options:hover {
+        background-color: #3a3b3c;
+    }
+
+    .post-image {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .post-image img {
+        width: 100%;
+        transition: var(--transition);
+        object-fit: cover;
+        max-height: 500px;
+    }
+
+    .post-image:hover img {
+        transform: scale(1.02);
+    }
+
+    .post-actions {
+        padding: 10px 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-top: 1px solid #f0f2f5;
+        border-bottom: 1px solid #f0f2f5;
+    }
+
+    .dark-mode .post-actions {
+        border-color: #3a3b3c;
+    }
+
+    .action-btn {
+        padding: 8px 15px;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: var(--transition);
+        color: #65676b;
+        background-color: transparent;
+        cursor: pointer;
+    }
+
+    .dark-mode .action-btn {
+        color: #b0b3b8;
+    }
+
+    .action-btn i {
+        margin-right: 6px;
+        font-size: 1.1rem;
+    }
+
+    .action-btn:hover {
+        background-color: #f0f2f5;
+    }
+
+    .dark-mode .action-btn:hover {
+        background-color: #3a3b3c;
+    }
+
+    .like-button.liked i {
+        color: #e0245e;
+    }
+
+    .post-content {
+        padding: 15px;
+    }
+
+    .post-caption {
+        font-size: 0.95rem;
+        margin-bottom: 10px;
+        word-break: break-word;
+    }
+    
+    .dark-mode .post-caption {
+        color: #e4e6eb;
+    }
+
+    .post-likes {
+        font-size: 0.85rem;
+        color: #65676b;
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+
+    .dark-mode .post-likes {
+        color: #b0b3b8;
+    }
+
+    .comment-section {
+        margin-top: 10px;
+    }
+
+    .comment-item {
+        display: flex;
+        margin-bottom: 10px;
+    }
+
+    .comment-bubble {
+        background-color: #f0f2f5;
+        border-radius: 18px;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        max-width: calc(100% - 42px);
+    }
+
+    .dark-mode .comment-bubble {
+        background-color: #3a3b3c;
+        color: #e4e6eb;
+    }
+
+    .comment-user {
+        font-weight: 600;
+        margin-right: 5px;
+    }
+
+    .comment-text {
+        word-break: break-word;
+    }
+
+    .comment-meta {
+        font-size: 0.75rem;
+        color: #65676b;
+        margin-top: 3px;
+        margin-left: 12px;
+    }
+
+    .dark-mode .comment-meta {
+        color: #b0b3b8;
+    }
+
+    .view-comments {
+        font-size: 0.85rem;
+        color: #65676b;
+        margin-top: 10px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .dark-mode .view-comments {
+        color: #b0b3b8;
+    }
+
+    .view-comments:hover {
+        text-decoration: underline;
+    }
+    
+    .page-header {
+        margin-bottom: 25px;
+        padding: 20px;
+        border-radius: var(--border-radius);
+        background-color: white;
+        box-shadow: var(--box-shadow);
+        transition: var(--transition);
+    }
+    
+    .dark-mode .page-header {
+        background-color: #242526;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .page-title {
+        color: var(--primary-color);
+        margin-bottom: 5px;
+        font-weight: 700;
+    }
+    
+    .dark-mode .page-title {
+        color: var(--success-color);
+    }
+    
+    .page-subtitle {
+        color: #65676b;
+        font-size: 1rem;
+        margin-bottom: 0;
+    }
+    
+    .dark-mode .page-subtitle {
+        color: #b0b3b8;
+    }
+    
+    /* Animation classes */
+    .fade-in {
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    
+    /* Empty state styling */
+    .empty-state {
+        text-align: center;
+        padding: 50px 20px;
+        background-color: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+    }
+    
+    .dark-mode .empty-state {
+        background-color: #242526;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .empty-state img {
+        max-width: 150px;
+        opacity: 0.7;
+        margin-bottom: 20px;
+    }
+    
+    .empty-state h4 {
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+    
+    .dark-mode .empty-state h4 {
+        color: #e4e6eb;
+    }
+    
+    .empty-state p {
+        color: #65676b;
+        margin-bottom: 20px;
+    }
+    
+    .dark-mode .empty-state p {
+        color: #b0b3b8;
+    }
+    
+    /* Sidebar styles */
+    .sidebar {
+        position: sticky;
+        top: 100px;
+    }
+    
+    .sidebar-card {
+        background-color: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        margin-bottom: 20px;
+        overflow: hidden;
+        transition: var(--transition);
+    }
+    
+    .dark-mode .sidebar-card {
+        background-color: #242526;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .sidebar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        border-bottom: 1px solid #f0f2f5;
+        font-weight: 600;
+    }
+    
+    .dark-mode .sidebar-header {
+        border-color: #3a3b3c;
+        color: #e4e6eb;
+    }
+    
+    .see-all {
+        color: var(--primary-color);
+        font-size: 0.85rem;
+        cursor: pointer;
+    }
+    
+    .dark-mode .see-all {
+        color: var(--success-color);
+    }
+    
+    .suggestions-list {
+        padding: 10px;
+    }
+    
+    .suggestion-item {
+        display: flex;
+        align-items: center;
+        padding: 8px;
+        transition: var(--transition);
+        border-radius: var(--border-radius);
+    }
+    
+    .suggestion-item:hover {
+        background-color: #f0f2f5;
+    }
+    
+    .dark-mode .suggestion-item:hover {
+        background-color: #3a3b3c;
+    }
+    
+    .suggestion-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 10px;
+        border: 2px solid #f0f2f5;
+    }
+    
+    .dark-mode .suggestion-avatar {
+        border-color: #3a3b3c;
+    }
+    
+    .suggestion-info {
+        flex: 1;
+    }
+    
+    .suggestion-name {
+        margin-bottom: 2px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: inherit;
+    }
+    
+    .suggestion-meta {
+        font-size: 0.75rem;
+        color: #65676b;
+    }
+    
+    .dark-mode .suggestion-meta {
+        color: #b0b3b8;
+    }
+    
+    .follow-btn {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    
+    .follow-btn:hover {
+        background-color: var(--secondary-color);
+    }
+    
+    .dark-mode .follow-btn {
+        background-color: var(--success-color);
+    }
+    
+    .dark-mode .follow-btn:hover {
+        background-color: var(--info-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Navigation Tabs -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="navigation-tabs">
+                <ul class="nav nav-pills nav-fill">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-stream me-2"></i>Feed
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/recommendations/">
+                            <i class="fas fa-compass me-2"></i>Recommendations
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/popular/">
+                            <i class="fas fa-fire me-2"></i>Popular
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#friends-network" id="friends-network-tab">
+                            <i class="fas fa-users me-2"></i>Friends Network
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="page-header fade-in">
+                <h1 class="page-title">
+                    <i class="fas fa-compass me-2"></i>Recommendations
+                </h1>
+                <p class="page-subtitle">Discover posts and users connected to your network</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Friends of Friends Posts Section -->
+        <div class="col-lg-8 col-md-12">
+            {% if friends_of_friends_posts %}
+                {% for post in friends_of_friends_posts %}
+                <div class="recommendation-card fade-in">
+                    <!-- Post Header -->
+                    <div class="post-header">
+                        <a href="/profile/{{post.user}}" class="d-flex align-items-center text-decoration-none">
+                            <img src="{{post.img}}" class="post-avatar" alt="{{post.user}}" />
+                            <div class="post-user-info">
+                                <h6 class="mb-0">@{{post.user}}</h6>
+                                <span class="post-time">{{ post.created_at|date:"F d, Y" }}</span>
+                                <div class="connections">
+                                    Connected via: 
+                                    {% for connection in post.connections %}
+                                        <a href="/profile/{{connection}}" class="text-decoration-none">@{{connection}}</a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- Post Image -->
+                    {% if post.image %}
+                    <div class="post-image">
+                        <a href="/post/{{post.id}}">
+                            <img src="{{post.image.url}}" alt="Post" />
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Post Actions -->
+                    <div class="post-actions">
+                        <div>
+                            <a id="like{{post.id}}" data-catid="{{post.id}}" class="action-btn like-button {% if post.id in liked_posts %}liked{% endif %}">
+                                <i class="{% if post.id in liked_posts %}fas{% else %}far{% endif %} fa-heart"></i> Like
+                            </a>
+                            <a href="/post/{{post.id}}" class="action-btn">
+                                <i class="far fa-comment"></i> Comment
+                            </a>
+                        </div>
+                        <div>
+                            <a class="action-btn">
+                                <i class="far fa-bookmark"></i> Save
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Post Content -->
+                    <div class="post-content">
+                        <!-- Caption -->
+                        {% if post.caption %}
+                        <p class="post-caption">{{post.caption}}</p>
+                        {% endif %}
+                        
+                        <!-- Likes -->
+                        <div class="post-likes">
+                            {% if post.no_of_likes == 0 %}
+                            <span class="like-mess">No likes yet</span>
+                            {% elif post.no_of_likes == 1 %}
+                            <span class="like-mess">Liked by <strong>{{post.no_of_likes}}</strong> person</span>
+                            {% else %}
+                            <span class="like-mess">Liked by <strong>{{post.no_of_likes}}</strong> people</span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Comments -->
+                        {% if post.post_comments %}
+                        <div class="comment-section">
+                            {% for comment in post.post_comments %}
+                            <div class="comment-item">
+                                <div class="comment-bubble">
+                                    <span class="comment-user">@{{comment.user}}</span>
+                                    <span class="comment-text">{{comment.comment}}</span>
+                                </div>
+                            </div>
+                            <div class="comment-meta">
+                                {{comment.created_at|date:"M d"}} • Like • Reply
+                            </div>
+                            {% endfor %}
+                            
+                            {% if post.count_comments > post.post_comments|length %}
+                            <a href="/post/{{post.id}}" class="view-comments">View all {{post.count_comments}} comments</a>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state fade-in">
+                    <img src="{% static 'assets/images/empty-feed.png' %}" alt="No Recommendations" class="mb-3">
+                    <h4>No Recommendations Yet</h4>
+                    <p>When your friends follow people you don't follow, their posts will appear here</p>
+                    <a href="/popular/" class="btn btn-primary mt-2">
+                        <i class="fas fa-fire me-2"></i>Check Popular Posts
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4 col-md-12">
+            <div class="sidebar">
+                <!-- User Profile Card -->
+                <div class="sidebar-card fade-in">
+                    <div class="sidebar-header">
+                        <span>People You May Know</span>
+                        <span class="see-all">See All</span>
+                    </div>
+                    
+                    <div class="suggestions-list">
+                        {% for suggestion in usersuggest_profile_list %}
+                        <div class="suggestion-item">
+                            <a href="profile/{{suggestion.user}}" class="text-decoration-none">
+                                <img src="{{suggestion.profile_pic.url}}" class="suggestion-avatar" alt="{{suggestion.user}}" />
+                            </a>
+                            <div class="suggestion-info">
+                                <p class="suggestion-name">@{{suggestion.user}}</p>
+                                <p class="suggestion-meta mb-0">{{suggestion.followers}} followers</p>
+                            </div>
+                            <div class="follow-btn">Follow</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Tips Card -->
+                <div class="sidebar-card fade-in">
+                    <div class="sidebar-header">
+                        <span>Tips</span>
+                    </div>
+                    <div class="p-2">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3 text-primary">
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Connect with Friends</h6>
+                                <p class="text-muted mb-0 small">Follow more people to see more recommendations</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="me-3 text-success">
+                                <i class="fas fa-share-alt fa-2x"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Share Your Content</h6>
+                                <p class="text-muted mb-0 small">Post more to increase your visibility</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="text/javascript">
+    $(document).ready(function() {
+        // Apply fade-in animation to elements
+        setTimeout(() => {
+            $('.fade-in').each(function(i) {
+                setTimeout(() => {
+                    $(this).css('opacity', '1');
+                    $(this).css('transform', 'translateY(0)');
+                }, i * 100);
+            });
+        }, 300);
+        
+        // Like button functionality
+        $('.like-button').click(function() {
+            var catid = $(this).attr("data-catid");
+            var likeMessElement = $(this).closest('.recommendation-card').find('.like-mess');
+            var heartIcon = $(this).find('i');
+            
+            $.ajax({
+                type: "GET",
+                url: "/like-post",
+                data: {
+                    post_id: catid
+                },
+                success: function(data) {
+                    // Update like count message
+                    if (data.likes == 0) {
+                        likeMessElement.text("No likes yet");
+                    } else if (data.likes == 1) {
+                        likeMessElement.text("Liked by " + data.likes + " person");
+                    } else {
+                        likeMessElement.text("Liked by " + data.likes + " people");
+                    }
+                    
+                    // Toggle heart icon and button class
+                    if (data.status === 'liked') {
+                        heartIcon.removeClass('far').addClass('fas');
+                        $('.like-button[data-catid="' + catid + '"]').addClass('liked');
+                    } else {
+                        heartIcon.removeClass('fas').addClass('far');
+                        $('.like-button[data-catid="' + catid + '"]').removeClass('liked');
+                    }
+                }
+            });
+        });
+        
+        // Friend network tab functionality
+        $('#friends-network-tab').on('click', function(e) {
+            e.preventDefault();
+            $('html, body').animate({
+                scrollTop: 0
+            }, 500);
+        });
+        
+        // Check if there's a theme preference in localStorage
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme === 'dark') {
+            $('body').addClass('dark-mode');
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,437 @@
+/* UI Synchronization CSS */
+
+/* Theme Support - Core Variables */
+:root {
+  --primary-color: #4361ee;
+  --secondary-color: #3f37c9;
+  --accent-color: #4895ef;
+  --success-color: #4cc9f0;
+  --warning-color: #f72585;
+  --info-color: #7209b7;
+  --light-color: #f8f9fa;
+  --body-bg: #f0f2f5;
+  --text-color: #212529;
+  --text-muted: #65676b;
+  --navbar-bg: #fff;
+  --dropdown-bg: #fff;
+  --card-bg: #ffffff;
+  --input-bg: #fff;
+  --border-color: #e4e6eb;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --hover-bg: #f0f2f5;
+  --transition: all 0.3s ease;
+  --border-radius: 10px;
+  --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode {
+  --primary-color: #4cc9f0;
+  --secondary-color: #4895ef;
+  --accent-color: #7209b7;
+  --success-color: #42b72a;
+  --warning-color: #f7b928;
+  --danger-color: #ed4956;
+  --light-color: #2e3031;
+  --body-bg: #18191a;
+  --text-color: #e4e6eb;
+  --text-muted: #b0b3b8;
+  --navbar-bg: #242526;
+  --dropdown-bg: #3a3b3c;
+  --card-bg: #242526;
+  --input-bg: #3a3b3c;
+  --border-color: #3a3b3c;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --hover-bg: #3a3b3c;
+  --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Body Styles */
+body {
+  background-color: var(--body-bg) !important;
+  color: var(--text-color) !important;
+  transition: var(--transition);
+  min-height: 100vh;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Navbar */
+.navbar {
+  background-color: var(--card-bg) !important;
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 2px 10px var(--shadow-color);
+  transition: var(--transition);
+}
+
+.navbar-brand, .nav-link {
+  color: var(--text-color) !important;
+  transition: var(--transition);
+}
+
+.navbar-toggler {
+  border-color: var(--border-color);
+  color: var(--text-color);
+}
+
+/* Dropdown Fixes & Styling */
+.dropdown-menu {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+  box-shadow: var(--box-shadow);
+  z-index: 1050;
+  transition: var(--transition);
+  position: absolute;
+}
+
+.dropdown-item {
+  color: var(--text-color);
+  transition: var(--transition);
+}
+
+.dropdown-item:hover {
+  background-color: var(--hover-bg);
+  color: var(--text-color);
+}
+
+.dropdown-divider {
+  border-top-color: var(--border-color);
+}
+
+/* Dropdown position fixes */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-menu.show {
+  display: block;
+}
+
+.dropdown-menu-end {
+  right: 0;
+  left: auto;
+}
+
+/* Cards & Content Containers */
+.card, .modal-content, .list-group-item {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+  color: var(--text-color);
+  transition: var(--transition);
+}
+
+.modal-header, .modal-footer {
+  border-color: var(--border-color);
+}
+
+/* Form elements */
+.form-control, .btn {
+  transition: var(--transition);
+}
+
+.form-control {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+  color: var(--text-color);
+}
+
+.form-control:focus {
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+}
+
+/* Post and content styling */
+.post-container {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.post-header {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.post-content {
+  padding: 15px;
+}
+
+.post-actions {
+  padding: 10px 15px;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Comment sections */
+.comment-section {
+  background-color: var(--card-bg);
+  border-top: 1px solid var(--border-color);
+}
+
+.comment-content {
+  color: var(--text-color);
+}
+
+/* Text color utilities */
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
+.text-dark {
+  color: var(--text-color) !important;
+}
+
+/* Background utilities */
+.bg-white {
+  background-color: var(--card-bg) !important;
+}
+
+.bg-light {
+  background-color: var(--light-color) !important;
+}
+
+/* Border utilities */
+.border {
+  border-color: var(--border-color) !important;
+}
+
+/* Mobile responsiveness enhancements */
+@media (max-width: 768px) {
+  .dropdown-menu {
+    max-width: 300px;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+  }
+  
+  .navbar-collapse {
+    background-color: var(--navbar-bg);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 5px 10px var(--shadow-color);
+  }
+  
+  .post-header, .post-content, .post-actions {
+    padding: 10px;
+  }
+}
+
+/* Theme switch button styling */
+.theme-switch {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: var(--card-bg);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--box-shadow);
+  z-index: 1000;
+  border: 1px solid var(--border-color);
+  transition: var(--transition);
+}
+
+.theme-switch:hover {
+  transform: scale(1.05);
+}
+
+.theme-switch i {
+  font-size: 1.3rem;
+  transition: var(--transition);
+}
+
+/* Animation classes */
+.fade-in {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* Notification styling consistency */
+.notification-dropdown {
+  width: 320px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+/* Message dropdown styling consistency */
+.message-dropdown {
+  width: 320px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+/* Profile dropdown styling */
+.profile-dropdown {
+  width: 220px;
+}
+
+/* Fix for modals in dark mode */
+.dark-mode .modal-backdrop {
+  opacity: 0.8 !important;
+}
+
+/* Post image handling */
+.post-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+/* Button styling consistency */
+.action-btn {
+  border-radius: 4px;
+  padding: 8px 15px;
+  transition: var(--transition);
+  border: none;
+  font-weight: 500;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 5px var(--shadow-color);
+}
+
+/* Navigation tab consistency */
+.nav-pills .nav-link {
+  color: var(--text-muted);
+  font-weight: 500;
+  border-radius: 0;
+  padding: 15px;
+  transition: var(--transition);
+}
+
+.nav-pills .nav-link:hover {
+  background-color: var(--hover-bg);
+}
+
+.nav-pills .nav-link.active {
+  background-color: transparent;
+  color: var(--primary-color);
+  position: relative;
+}
+
+.dark-mode .nav-pills .nav-link.active {
+  color: var(--success-color);
+}
+
+.nav-pills .nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50%;
+  height: 3px;
+  background-color: var(--primary-color);
+}
+
+.dark-mode .nav-pills .nav-link.active::after {
+  background-color: var(--success-color);
+}
+
+/* Navbar components */
+.navbar-brand {
+  color: var(--primary-color) !important;
+}
+
+.nav-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--text-muted);
+  transition: var(--transition);
+  margin: 0 5px;
+}
+
+.nav-icon:hover {
+  background-color: var(--hover-bg);
+  color: var(--primary-color);
+}
+
+.nav-icon.active {
+  color: var(--primary-color);
+}
+
+.profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-color);
+  transition: var(--transition);
+}
+
+.profile-avatar:hover {
+  transform: scale(1.05);
+}
+
+.search-form {
+  position: relative;
+  max-width: 300px;
+}
+
+.search-form .form-control {
+  padding-left: 40px;
+  background-color: var(--hover-bg);
+  border: none;
+  border-radius: 50px;
+  color: var(--text-color);
+  transition: var(--transition);
+}
+
+.search-form .search-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+}
+
+/* Ensure dropdown menus don't get cropped */
+.dropdown-menu {
+  margin-top: 0.125rem;
+  overflow: visible;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) {
+  .nav-icon {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .theme-switch {
+    width: 40px;
+    height: 40px;
+    bottom: 15px;
+    right: 15px;
+  }
+  
+  .theme-switch i {
+    font-size: 1.1rem;
+  }
+  
+  .navbar-brand span {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .container {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  
+  main {
+    margin-top: 60px;
+  }
+}

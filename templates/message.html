@@ -1,4 +1,4 @@
-    {% extends "base.html" %}
+{% extends "base.html" %}
 {% load static %}
 
 {% block content %}
@@ -260,53 +260,7 @@
                     </div>
                 </div>
                 <div class="mesgs">
-                    <div class="msg_history">
-                        <!-- <div class="incoming_msg">
-                            <div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png"
-                                    alt="sunil"> </div>
-                            <div class="received_msg">
-                                <div class="received_withd_msg">
-                                    <p>Test which is a new approach to have all
-                                        solutions</p>
-                                    <span class="time_date"> 11:01 AM | June 9</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="outgoing_msg">
-                            <div class="sent_msg">
-                                <p>Test which is a new approach to have all
-                                    solutions</p>
-                                <span class="time_date"> 11:01 AM | June 9</span>
-                            </div>
-                        </div>
-                        <div class="incoming_msg">
-                            <div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png"
-                                    alt="sunil"> </div>
-                            <div class="received_msg">
-                                <div class="received_withd_msg">
-                                    <p>Test, which is a new approach to have</p>
-                                    <span class="time_date"> 11:01 AM | Yesterday</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="outgoing_msg">
-                            <div class="sent_msg">
-                                <p>Apollo University, Delhi, India Test</p>
-                                <span class="time_date"> 11:01 AM | Today</span>
-                            </div>
-                        </div>
-                        <div class="incoming_msg">
-                            <div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png"
-                                    alt="sunil"> </div>
-                            <div class="received_msg">
-                                <div class="received_withd_msg">
-                                    <p>We work directly with our designers and suppliers,
-                                        and sell direct to you, which means quality, exclusive
-                                        products, at a price anyone can afford.</p>
-                                    <span class="time_date"> 11:01 AM | Today</span>
-                                </div>
-                            </div>
-                        </div> -->
+                    <div class="msg_history" id="msg_history">
                         <div class="card-body msg_card_body chat-messages" id="messages">
                         </div>
                     </div>
@@ -315,37 +269,218 @@
                             <div class="input_msg_write">
                                 <input type="text" class="write_msg type_msg" id="input-message"
                                     placeholder="Type a message" autocomplete="off" />
-                                <button class="msg_send_btn" type="button"><i class="far fa-paper-plane"
+                                <button class="msg_send_btn" id="send-btn" type="button"><i class="far fa-paper-plane"
                                         aria-hidden="true"></i></button>
                             </div>
                         </div>
                     </form>
                 </div>
             </div>
-
         </div>
     </div>
 </main>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        $('#myMessages').attr('class', 'active');
-        // change active classes
-        $('.OtherUser').click(function () {
-            $('.OtherUser').removeClass('active');
-            $(this).addClass('active');
-            const thread_id = $(this).attr('chat-id');
-            // ajax get request
-            $.ajax({
-                url: "{% url 'get_messages'%}?thread_id=" + thread_id,
-                type: 'GET',
-                success: function (data) {
-                    $('#messages').html(data);
+    // Get the logged-in user's ID
+    const userId = document.getElementById('logged-in-user').value;
+    let activeThreadId = null;
+    let chatSocket = null;
+
+    // Initialize the WebSocket connection
+    function connectWebSocket() {
+        // Create WebSocket connection
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${wsProtocol}//${window.location.host}/ws/chat/`;
+        
+        chatSocket = new WebSocket(wsUrl);
+
+        // Connection opened
+        chatSocket.onopen = function(e) {
+            console.log('WebSocket connection established');
+            
+            // If we already have an active thread, join it
+            if (activeThreadId) {
+                joinThread(activeThreadId);
+            }
+        };
+
+        // Listen for messages
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            console.log('WebSocket message received:', data);
+            
+            // Handle different types of messages
+            if (data.type === 'chat_message') {
+                // If this message is for the currently active thread, display it
+                if (data.thread_id === activeThreadId) {
+                    displayMessage(data);
                 }
+            }
+        };
+
+        // Connection closed
+        chatSocket.onclose = function(e) {
+            console.log('WebSocket connection closed. Reconnecting in 5 seconds...');
+            // Attempt to reconnect after a delay
+            setTimeout(connectWebSocket, 5000);
+        };
+
+        // Connection error
+        chatSocket.onerror = function(e) {
+            console.error('WebSocket error:', e);
+        };
+    }
+
+    // Join a specific thread
+    function joinThread(threadId) {
+        if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+            activeThreadId = threadId;
+            
+            // Send join command to the WebSocket
+            chatSocket.send(JSON.stringify({
+                'command': 'join',
+                'thread_id': threadId
+            }));
+            
+            // Clear previous messages
+            document.getElementById('messages').innerHTML = '';
+            
+            // Load previous messages for this thread (you would implement this separately)
+            loadPreviousMessages(threadId);
+        } else {
+            console.log('WebSocket not connected, will join thread when connection is established');
+            activeThreadId = threadId;
+        }
+    }
+
+    // Function to load previous messages from the server
+    function loadPreviousMessages(threadId) {
+        // You would implement an AJAX call to load messages
+        // For example:
+        fetch(`/api/messages/${threadId}/`)
+            .then(response => response.json())
+            .then(data => {
+                data.messages.forEach(msg => {
+                    displayMessage({
+                        message: msg.message,
+                        user_id: msg.user_id,
+                        username: msg.username
+                    });
+                });
+            })
+            .catch(error => {
+                console.error('Error loading messages:', error);
             });
+    }
+
+    // Display a message in the chat
+    function displayMessage(data) {
+        const messagesContainer = document.getElementById('messages');
+        const messageElement = document.createElement('div');
+        
+        // Determine if this is an incoming or outgoing message
+        const isOutgoing = data.user_id == userId;
+        
+        if (isOutgoing) {
+            // Outgoing message (from current user)
+            messageElement.innerHTML = `
+                <div class="outgoing_msg">
+                    <div class="sent_msg">
+                        <p>${data.message}</p>
+                        <span class="time_date">Just now</span>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Incoming message (from other user)
+            messageElement.innerHTML = `
+                <div class="incoming_msg">
+                    <div class="incoming_msg_img">
+                        <img src="https://ptetutorials.com/images/user-profile.png" alt="${data.username}">
+                    </div>
+                    <div class="received_msg">
+                        <div class="received_withd_msg">
+                            <p>${data.message}</p>
+                            <span class="time_date">Just now</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        messagesContainer.appendChild(messageElement);
+        
+        // Scroll to the bottom of the messages container
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Send a message
+    function sendMessage(message) {
+        if (!activeThreadId) {
+            console.error('No active thread selected');
+            return;
+        }
+        
+        if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+            chatSocket.send(JSON.stringify({
+                'command': 'new_message',
+                'thread_id': activeThreadId,
+                'from': userId,
+                'message': message
+            }));
+        } else {
+            console.error('WebSocket not connected');
+        }
+    }
+
+    // Add click event listeners to thread list items
+    document.querySelectorAll('.OtherUser').forEach(thread => {
+        thread.addEventListener('click', function() {
+            const threadId = this.getAttribute('chat-id');
+            
+            // Update active thread visual indication
+            document.querySelectorAll('.OtherUser').forEach(t => {
+                t.classList.remove('active_chat');
+            });
+            this.classList.add('active_chat');
+            
+            // Join the thread
+            joinThread(threadId);
         });
     });
+
+    // Add event listener for send button and enter key
+    document.getElementById('send-btn').addEventListener('click', function() {
+        const messageInput = document.getElementById('input-message');
+        const message = messageInput.value.trim();
+        
+        if (message) {
+            sendMessage(message);
+            messageInput.value = ''; // Clear input field
+        }
+    });
+    
+    document.getElementById('input-message').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Prevent form submission
+            document.getElementById('send-btn').click();
+        }
+    });
+
+    // Initialize WebSocket connection when page loads
+    connectWebSocket();
+    
+    // If there's a thread in the URL, join it automatically
+    const urlParams = new URLSearchParams(window.location.search);
+    const threadIdParam = urlParams.get('thread_id');
+    if (threadIdParam) {
+        // Find and click the corresponding thread in the list
+        const threadElement = document.querySelector(`.OtherUser[chat-id="${threadIdParam}"]`);
+        if (threadElement) {
+            threadElement.click();
+        } else {
+            // If thread not in the list, join it directly
+            joinThread(threadIdParam);
+        }
+    }
 </script>
-
-
-
 {% endblock %}

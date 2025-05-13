@@ -3,32 +3,26 @@
 <!DOCTYPE html>
 <html lang="en">
 
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
-    <title>Profile - {{user_profile.user.username}}</title>
+    <title>{% block title %}SoundWave{% endblock %}</title>
     <!-- MDB icon -->
     <link rel="icon" href="{% static 'assets/images/soundcloud.png' %}" type="image/png" />
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <!-- Google Fonts Roboto -->
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" />
-    <!-- MDB -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" />
+    <!-- jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-
+    <!-- MDB -->
     <link rel="stylesheet" href="{% static 'assets/css/mdb.min.css' %}" />
+    <!-- Custom CSS for UI synchronization -->
+    <link rel="stylesheet" href="{% static 'css/ui-sync.css' %}" />
 
-
-</head>
-
-
-<body>
     <style>
         body {
-            background-color: #fafafa;
             margin-bottom: 3rem;
         }
 
@@ -37,7 +31,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            z-index: 1;
+            z-index: 1000;
         }
 
         h1 {
@@ -49,14 +43,35 @@
         }
 
         .modal-backdrop {
-            z-index: 0;
+            z-index: 999;
+        }
+        
+        main {
+            margin-top: 80px;
+            padding: 20px 0;
         }
     </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Theme Switch Button -->
+    <div class="theme-switch" id="themeSwitch" title="Switch to dark mode">
+        <i class="fas fa-moon"></i>
+    </div>
+    
     <header>
         <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <nav class="navbar navbar-expand-lg navbar-light">
             <!-- Container wrapper -->
-            <div class="container-fluid">
+            <div class="container">
+                <!-- Brand -->
+                <a class="navbar-brand" href="/">
+                    <img src="{% static 'assets/images/soundcloud.png' %}" height="30" alt="SoundWave Logo" />
+                    <span class="d-none d-sm-inline">SoundWave</span>
+                </a>
+
                 <!-- Toggle button -->
                 <button class="navbar-toggler" type="button" data-mdb-toggle="collapse"
                     data-mdb-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
@@ -66,140 +81,116 @@
 
                 <!-- Collapsible wrapper -->
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-md-1"></div>
-                            <div class="col-md-5">
-                                <a class="navbar-brand" href="/">
-                                    <img src="https://banner2.cleanpng.com/20190418/wfj/kisspng-logo-photography-music-image-soundcloud-soundcloud-logo-svg-png-icon-free-download-4-963-5cb945e4bd62b7.7101502515556459247757.jpg"
-                                        height="30" alt="Ins Logo" loading="lazy" />
-                                </a>
-                            </div>
-                            <div class="col-md-2">
-                                <form class="d-flex input-group w-auto">
-                                    <input type="search" class="form-control rounded" placeholder="Search"
-                                        aria-label="Search" aria-describedby="search-addon" />
-
-                                </form>
-                            </div>
-                            <div class="col-md-3">
-                                <ul class="navbar-nav justify-content-center ">
-                                    <!-- Icons -->
-                                    <li class="nav-item me-3 me-lg-0">
-                                        <a class="nav-link" href="#">
-                                            <i class="fas fa-home fa-lg text-dark"></i>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item me-3 me-lg-0">
-                                        <a class="nav-link" href="/messages">
-                                            <i class="fab fa-facebook-messenger fa-lg text-dark"></i>
-                                        </a>
-                                    </li>
-                                    <!-- Upload files dropdown -->
-                                    <li class="nav-item me-3 me-lg-0">
-
-                                        <!-- Button trigger modal -->
-                                        <a class="nav-link" style="cursor: pointer;" data-mdb-toggle="modal"
-                                            data-mdb-target="#exampleModal">
-                                            <i class="far fa-plus-square fa-lg text-dark"></i>
-                                        </a>
-
-                                        <!-- Modal -->
-                                        <div class="modal fade" id="exampleModal" tabindex="-1"
-                                            aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <form method="post" action="/upload" enctype="multipart/form-data">
-                                                        {% csrf_token %}
-                                                        <div class="modal-header text-center">
-                                                            <h5 class="modal-title" id="exampleModalLabel">Create New
-                                                                Post
-                                                            </h5>
-                                                            <button type="button" class="btn-close"
-                                                                data-mdb-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-
-                                                            <input type="file" name="image_upload"><br><br>
-                                                            <input type="file" name="music_upload"><br><br>
-                                                            <textarea class="button soft-warning small" name="caption"
-                                                                placeholder="Caption..."></textarea>
-
-
-                                                            <div class="modal-footer">
-                                                                <button type="button" class="btn btn-secondary"
-                                                                    data-mdb-dismiss="modal">Close</button>
-                                                                <button type="submit" class="btn btn-primary">Save
-                                                                    changes</button>
-                                                            </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-
-                                    </li>
-                                    <!-- Avatar dropdown -->
-                                    <li class="nav-item dropdown">
-                                        <a class="nav-link dropdown-toggle d-flex align-items-center"
-                                            style="cursor: pointer;" id="navbarDropdownMenuLink" role="button"
-                                            data-mdb-toggle="dropdown" aria-expanded="false">
-                                            <img src="{{main_profile.profile_pic.url}}" class="rounded-circle"
-                                                height="25" width="25" alt="Profile" />
-
-                                        </a>
-                                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                                            <li>
-                                                <a class="dropdown-item" href="/profile/{{request.user.username}}">My
-                                                    profile</a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item" href="/settings">Settings</a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item" href="/logout">Logout</a>
-                                            </li>
-                                        </ul>
-                                    </li>
-
-                                </ul>
-                            </div>
-                        </div>
+                    <div class="d-md-none w-100 my-3">
+                        <form action="/search" method="POST" class="search-form">
+                            {% csrf_token %}
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" name="username" class="form-control" placeholder="Search people..." aria-label="Search" />
+                        </form>
                     </div>
+                    
+                    <!-- Search form -->
+                    <form action="/search" method="POST" class="search-form d-none d-md-block mx-auto">
+                        {% csrf_token %}
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" name="username" class="form-control" placeholder="Search people..." aria-label="Search" />
+                    </form>
+                    
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+                        <!-- Icons -->
+                        <li class="nav-item">
+                            <a class="nav-icon {% if request.path == '/' %}active{% endif %}" href="/" title="Home">
+                                <i class="fas fa-home fa-lg"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-icon {% if '/recommendations/' in request.path %}active{% endif %}" href="/recommendations/" title="Discover">
+                                <i class="fas fa-compass fa-lg"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-icon {% if '/messages' in request.path %}active{% endif %}" href="/messages" title="Messages">
+                                <i class="fas fa-comment fa-lg"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-icon" style="cursor: pointer;" data-mdb-toggle="modal" data-mdb-target="#exampleModal" title="Create Post">
+                                <i class="fas fa-plus fa-lg"></i>
+                            </a>
+                        </li>
+                        
+                        <!-- Avatar -->
+                        <li class="nav-item dropdown ms-2">
+                            <a class="nav-link dropdown-toggle p-0" id="navbarDropdownMenuLink" role="button"
+                                data-mdb-toggle="dropdown" aria-expanded="false">
+                                <img src="{{main_profile.profile_pic.url}}" class="profile-avatar" alt="Profile" />
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+                                <li>
+                                    <a class="dropdown-item" href="/profile/{{request.user.username}}">
+                                        <i class="fas fa-user me-2"></i>My Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/settings">
+                                        <i class="fas fa-cog me-2"></i>Settings
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="/logout">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
                 </div>
-
-                <!-- Collapsible wrapper -->
-
-                <!-- Right elements -->
-                <div class="d-flex align-items-center">
-                    <!-- Icon -->
-
-                    <!-- Notifications -->
-
-                    <!-- Avatar -->
-
-                </div>
-                <!-- Right elements -->
             </div>
-            <!-- Container wrapper -->
         </nav>
-
-        <!-- Navbar -->
     </header>
 
-    {% block content %}
+    <!-- Create Post Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" action="/upload" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Create New Post</h5>
+                        <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Upload Image</label>
+                            <input type="file" name="image_upload" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Upload Music (optional)</label>
+                            <input type="file" name="music_upload" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Caption</label>
+                            <textarea class="form-control" name="caption" rows="3" placeholder="Write a caption..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Post</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
-    {% endblock %}
+    <main>
+        {% block content %}{% endblock %}
+    </main>
 
-
-
-
-
-
-
-
-    <!-- Scripts
-    ================================================== -->
+    <!-- Scripts -->
     <script src="{% static 'assets/js/mdb.min.js' %}"></script>
+    <script src="{% static 'js/ui-sync.js' %}"></script>
+    
+    {% block extra_js %}{% endblock %}
 </body>
-
-
 </html>
