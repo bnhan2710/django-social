@@ -375,8 +375,31 @@ def messages_view(request):
     threads = Thread.objects.by_user(user=request.user).order_by('-updated_at')
     user_object = User.objects.get(username=request.user.username)
     main_profile = Profile.objects.get(user=user_object)
+    
+    # Process threads to add additional information
+    for thread in threads:
+        # Get the other user in the thread
+        other_user = thread.first_person if request.user == thread.second_person else thread.second_person
+        thread.other_user = other_user
+        
+        # Get the other user's profile
+        try:
+            thread.other_profile = Profile.objects.get(user=other_user)
+        except Profile.DoesNotExist:
+            thread.other_profile = None
+        
+        # Get unread count for current user
+        thread.unread_count = thread.get_unread_count(request.user)
+        
+        # Get the last message timestamp in a readable format
+        if thread.messages.exists():
+            last_message = thread.messages.order_by('-timestamp').first()
+            thread.last_message_time = last_message.timestamp
+        else:
+            thread.last_message_time = thread.updated_at
+    
     context = {
-        'Threads': threads,
+        'threads': threads,
         'main_profile': main_profile,
     }
     return render(request, 'message.html', context)
@@ -384,22 +407,169 @@ def messages_view(request):
 
 @login_required(login_url='signin')
 def get_messages(request):
-    pk = request.GET.get('thread_id')
-    thread = Thread.objects.get(id=pk)
-    receiver = thread.second_person if request.user == thread.first_person else thread.first_person
-    context = {
-        'thread': thread,
-        'receiver': receiver,
-    }
-    return render(request, 'messages.html', context)
+    thread_id = request.GET.get('thread_id')
+    
+    try:
+        thread = Thread.objects.get(id=thread_id)
+        
+        # Check if user is part of this thread
+        if request.user != thread.first_person and request.user != thread.second_person:
+            return HttpResponseForbidden("You don't have permission to access this thread")
+        
+        # Get the other user in the thread
+        other_user = thread.first_person if request.user == thread.second_person else thread.second_person
+        
+        # Mark thread as read
+        thread.mark_as_read(request.user)
+        
+        # Mark all messages from the other user as read
+        ChatMessage.objects.filter(thread=thread, user=other_user, is_read=False).update(is_read=True)
+        
+        context = {
+            'thread': thread,
+            'other_user': other_user,
+        }
+        return render(request, 'messages.html', context)
+    except Thread.DoesNotExist:
+        return HttpResponseNotFound("Thread not found")
+
+
+@login_required(login_url='signin')
+def api_get_messages(request, thread_id):
+    from django.http import JsonResponse
+    
+    try:
+        thread = Thread.objects.get(id=thread_id)
+        
+        # Check if user is part of this thread
+        if request.user != thread.first_person and request.user != thread.second_person:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        # Mark thread as read
+        thread.mark_as_read(request.user)
+        
+        # Get the other user in the thread
+        other_user = thread.first_person if request.user == thread.second_person else thread.first_person
+        
+        # Get other user's profile
+        try:
+            other_profile = Profile.objects.get(user=other_user)
+            profile_pic_url = other_profile.profile_pic.url
+        except Profile.DoesNotExist:
+            profile_pic_url = None
+        
+        # Get current user's profile
+        try:
+            user_profile = Profile.objects.get(user=request.user)
+            user_profile_pic_url = user_profile.profile_pic.url
+        except Profile.DoesNotExist:
+            user_profile_pic_url = None
+        
+        messages = []
+        for chat in thread.messages.all().order_by('timestamp'):
+            # Determine profile picture URL based on message sender
+            profile_pic = user_profile_pic_url if chat.user == request.user else profile_pic_url
+            
+            messages.append({
+                'id': chat.id,
+                'message': chat.message,
+                'user_id': chat.user.id,
+                'username': chat.user.username,
+                'timestamp': chat.get_timestamp(),
+                'profile_pic': profile_pic,
+                'is_read': chat.is_read
+            })
+        
+        # Mark messages as read
+        ChatMessage.objects.filter(thread=thread).exclude(user=request.user).filter(is_read=False).update(is_read=True)
+        
+        return JsonResponse({
+            'thread_id': thread_id,
+            'messages': messages,
+            'other_user': {
+                'id': other_user.id,
+                'username': other_user.username,
+                'profile_pic': profile_pic_url
+            }
+        })
+    except Thread.DoesNotExist:
+        return JsonResponse({'error': 'Thread not found'}, status=404)
 
 
 @login_required(login_url='signin')
 def sendmessage(request, pk):
-    thread, is_created = Thread.objects.get_or_create(
-        user=request.user, receiver=User.objects.get(pk=pk))
-    thread.save(update_fields=['updated_at'])
+    try:
+        receiver = User.objects.get(pk=pk)
+        thread, is_created = Thread.objects.get_or_create(user=request.user, receiver=receiver)
+        
+        # If POST request with message content
+        if request.method == 'POST' and request.POST.get('message'):
+            message_content = request.POST.get('message').strip()
+            if message_content:
+                # Create the message
+                message = ChatMessage.objects.create(
+                    thread=thread,
+                    user=request.user,
+                    message=message_content
+                )
+                
+                # Update thread
+                thread.last_message = message_content
+                thread.save(update_fields=['updated_at', 'last_message'])
+                
+                # Increment unread count for receiver
+                if request.user == thread.first_person:
+                    thread.unread_messages_count_second += 1
+                else:
+                    thread.unread_messages_count_first += 1
+                thread.save()
+                
+                # If AJAX request
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'status': 'success',
+                        'message_id': message.id,
+                        'timestamp': message.get_timestamp()
+                    })
+        
+        # If AJAX request for thread info
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'thread_id': thread.id
+            })
+            
+        return redirect(f'/messages/?thread_id={thread.id}')
+    except User.DoesNotExist:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'User not found'}, status=404)
+        return redirect('/messages/')
+
+
+@login_required(login_url='signin')
+def create_group_chat(request):
+    if request.method == 'POST':
+        # This is a placeholder for future group chat functionality
+        pass
     return redirect('/messages/')
+
+
+@login_required(login_url='signin')
+def get_unread_counts(request):
+    from django.http import JsonResponse
+    
+    threads = Thread.objects.by_user(user=request.user)
+    unread_counts = {}
+    total_unread = 0
+    
+    for thread in threads:
+        unread = thread.get_unread_count(request.user)
+        unread_counts[thread.id] = unread
+        total_unread += unread
+    
+    return JsonResponse({
+        'unread_counts': unread_counts,
+        'total_unread': total_unread
+    })
 
 
 @login_required(login_url='signin')
@@ -663,3 +833,91 @@ def friends_network(request):
     }
     
     return render(request, 'friends_network.html', context)
+
+
+@login_required(login_url='signin')
+@login_required(login_url='signin')
+def followers_list(request, username):
+    user_object = User.objects.get(username=request.user.username)
+    user_profile = Profile.objects.get(user=user_object)
+    
+    # Get the target user
+    target_user = User.objects.get(username=username)
+    
+    # Get users who follow the target user
+    followers_objects = FollowersCount.objects.filter(user=username)
+    followers_list = []
+    
+    for follower in followers_objects:
+        try:
+            follower_user = User.objects.get(username=follower.follower)
+            follower_profile = Profile.objects.get(user=follower_user)
+            
+            # Check if the logged-in user follows this follower
+            is_following = FollowersCount.objects.filter(
+                follower=request.user.username, 
+                user=follower.follower
+            ).exists()
+            
+            followers_list.append({
+                'user': follower_user,
+                'profile': follower_profile,
+                'is_following': is_following
+            })
+        except (User.DoesNotExist, Profile.DoesNotExist):
+            continue
+    
+    context = {
+        'user_profile': user_profile,
+        'target_user': target_user,
+        'followers_list': followers_list,
+        'page_type': 'followers'
+    }
+    
+    return render(request, 'connections.html', context)
+
+
+@login_required(login_url='signin')
+def following_list(request, username):
+    user_object = User.objects.get(username=request.user.username)
+    user_profile = Profile.objects.get(user=user_object)
+    
+    # Get the target user
+    target_user = User.objects.get(username=username)
+    
+    # Get users that the target user follows
+    following_objects = FollowersCount.objects.filter(follower=username)
+    following_list = []
+    
+    for following in following_objects:
+        try:
+            following_user = User.objects.get(username=following.user)
+            following_profile = Profile.objects.get(user=following_user)
+            
+            # Check if the logged-in user follows this user
+            is_following = FollowersCount.objects.filter(
+                follower=request.user.username, 
+                user=following.user
+            ).exists()
+            
+            following_list.append({
+                'user': following_user,
+                'profile': following_profile,
+                'is_following': is_following
+            })
+        except (User.DoesNotExist, Profile.DoesNotExist):
+            continue
+    
+    context = {
+        'user_profile': user_profile,
+        'target_user': target_user,
+        'following_list': following_list,
+        'page_type': 'following'
+    }
+    
+    return render(request, 'connections.html', context)
+
+
+@login_required(login_url='signin')
+def test_websocket(request):
+    return render(request, 'test_websocket.html')

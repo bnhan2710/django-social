@@ -348,6 +348,26 @@
                 grid-template-columns: 1fr;
             }
         }
+        
+        /* Connection links enhancement */
+        .profile-stats a {
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .profile-stats a:hover {
+            color: var(--main-color);
+        }
+        
+        .profile-stats a:hover::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--main-color);
+        }
     </style>
     <div class="container-profile">
         <div class="profile">
@@ -391,12 +411,12 @@
                     {% endif %}
                     
                     {% if user_followers == 0 or user_followers == 1 %}
-                    <li><span class="profile-stat-count">{{user_followers}}</span> follower</li>
+                    <li><a href="{% url 'followers_list' user_object.username %}" style="text-decoration: none; color: inherit;"><span class="profile-stat-count">{{user_followers}}</span> follower</a></li>
                     {% else %}
-                    <li><span class="profile-stat-count">{{user_followers}}</span> followers</li>
+                    <li><a href="{% url 'followers_list' user_object.username %}" style="text-decoration: none; color: inherit;"><span class="profile-stat-count">{{user_followers}}</span> followers</a></li>
                     {% endif %}
                     
-                    <li><span class="profile-stat-count">{{user_following}}</span> following</li>
+                    <li><a href="{% url 'following_list' user_object.username %}" style="text-decoration: none; color: inherit;"><span class="profile-stat-count">{{user_following}}</span> following</a></li>
                 </ul>
             </div>
             

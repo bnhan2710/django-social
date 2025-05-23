@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<main style="margin-top: 80px; padding: 20px;">
+    <h1>WebSocket Diagnostics</h1>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>System Information</h3>
+                </div>
+                <div class="card-body">
+                    <pre id="system-info"></pre>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>WebSocket Connection Test</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group mb-3">
+                        <label for="wsUrl">WebSocket URL:</label>
+                        <select id="wsUrl" class="form-control">
+                            <!-- Will be populated from debug_info -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <button id="connectBtn" class="btn btn-primary">Connect</button>
+                        <button id="disconnectBtn" class="btn btn-danger">Disconnect</button>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message">Test Message:</label>
+                        <div class="input-group">
+                            <input type="text" id="message" class="form-control" placeholder="Enter a test message">
+                            <button id="sendBtn" class="btn btn-success">Send</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Connection Status:</label>
+                        <div id="status" class="alert alert-secondary">Not connected</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3>WebSocket Log</h3>
+                    <button id="clearLogBtn" class="btn btn-sm btn-warning">Clear Log</button>
+                </div>
+                <div class="card-body">
+                    <pre id="log" style="height: 400px; overflow-y: auto; background-color: #f8f9fa; padding: 10px; border: 1px solid #ddd;"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Parse debug info
+            const debugInfo = JSON.parse('{{ debug_info|escapejs }}');
+            
+            // Display system info
+            document.getElementById('system-info').textContent = JSON.stringify({
+                system: debugInfo.system,
+                request: debugInfo.request,
+                channels: debugInfo.channels,
+                environment: debugInfo.environment
+            }, null, 2);
+            
+            // Populate WebSocket URLs
+            const wsUrlSelect = document.getElementById('wsUrl');
+            debugInfo.websocket_urls.forEach(url => {
+                const option = document.createElement('option');
+                option.value = url;
+                option.textContent = url;
+                wsUrlSelect.appendChild(option);
+            });
+            
+            // WebSocket connection
+            let socket = null;
+            
+            function log(message, type = 'info') {
+                const logEl = document.getElementById('log');
+                const entry = document.createElement('div');
+                entry.className = type;
+                entry.style.color = type === 'error' ? 'red' : (type === 'success' ? 'green' : 'blue');
+                entry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+                logEl.appendChild(entry);
+                logEl.scrollTop = logEl.scrollHeight;
+            }
+            
+            function updateStatus(message, isConnected) {
+                const statusEl = document.getElementById('status');
+                statusEl.textContent = message;
+                statusEl.className = `alert ${isConnected ? 'alert-success' : 'alert-danger'}`;
+            }
+            
+            // Connect button
+            document.getElementById('connectBtn').addEventListener('click', function() {
+                if (socket && socket.readyState !== WebSocket.CLOSED) {
+                    log('WebSocket is already connected or connecting', 'error');
+                    return;
+                }
+                
+                const wsUrl = document.getElementById('wsUrl').value;
+                log(`Connecting to ${wsUrl}...`);
+                updateStatus('Connecting...', false);
+                
+                try {
+                    socket = new WebSocket(wsUrl);
+                    
+                    socket.onopen = function(event) {
+                        log('WebSocket connection established', 'success');
+                        updateStatus('Connected', true);
+                    };
+                    
+                    socket.onmessage = function(event) {
+                        log(`Received message: ${event.data}`, 'info');
+                        try {
+                            const data = JSON.parse(event.data);
+                            log(`Parsed message: ${JSON.stringify(data, null, 2)}`, 'info');
+                        } catch (e) {
+                            // Not JSON, that's fine
+                        }
+                    };
+                    
+                    socket.onclose = function(event) {
+                        if (event.wasClean) {
+                            log(`WebSocket closed cleanly, code=${event.code}, reason=${event.reason}`, 'info');
+                        } else {
+                            log('WebSocket connection died', 'error');
+                        }
+                        updateStatus('Disconnected', false);
+                    };
+                    
+                    socket.onerror = function(error) {
+                        log(`WebSocket error: ${error}`, 'error');
+                        updateStatus('Error', false);
+                    };
+                } catch (error) {
+                    log(`Error creating WebSocket: ${error}`, 'error');
+                    updateStatus('Connection failed', false);
+                }
+            });
+            
+            // Disconnect button
+            document.getElementById('disconnectBtn').addEventListener('click', function() {
+                if (socket) {
+                    socket.close();
+                    socket = null;
+                    log('WebSocket disconnected', 'info');
+                    updateStatus('Disconnected', false);
+                } else {
+                    log('WebSocket is not connected', 'error');
+                }
+            });
+            
+            // Send button
+            document.getElementById('sendBtn').addEventListener('click', function() {
+                if (!socket || socket.readyState !== WebSocket.OPEN) {
+                    log('WebSocket is not connected', 'error');
+                    return;
+                }
+                
+                const message = document.getElementById('message').value;
+                if (!message) {
+                    log('Please enter a message to send', 'error');
+                    return;
+                }
+                
+                try {
+                    // Try to send as JSON if it's a valid command
+                    if (message.startsWith('{') && message.endsWith('}')) {
+                        socket.send(message);
+                    } else {
+                        // Try to format as a command
+                        const jsonMsg = JSON.stringify({
+                            command: 'send_message',
+                            thread_id: 1,  // Default thread ID
+                            message: message
+                        });
+                        socket.send(jsonMsg);
+                        log(`Sent command: ${jsonMsg}`, 'success');
+                    }
+                } catch (error) {
+                    log(`Error sending message: ${error}`, 'error');
+                }
+            });
+            
+            // Clear log button
+            document.getElementById('clearLogBtn').addEventListener('click', function() {
+                document.getElementById('log').innerHTML = '';
+            });
+        });
+    </script>
+</main>
+{% endblock %} 

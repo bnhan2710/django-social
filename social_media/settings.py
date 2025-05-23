@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-snvtessozg-6o-cg-owjsy9aqnaj%4uy9hb@5ar42+gntkhqvn
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '0.0.0.0', '*']
 
 
 # Application definition
@@ -132,11 +132,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Channel Layer Configuration
+# Using InMemoryChannelLayer for development
+# For production, use RedisChannelLayer with redis-server
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
-        # 'CONFIG': {
-        #     'hosts': [('127.0.0.1', 6579)],
-        # }
     }
 }
+
+# Add authentication backends for WebSocket authentication
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# Session settings
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+SESSION_COOKIE_SAMESITE = 'Lax'  # Use 'Strict' in production

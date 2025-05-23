@@ -92,11 +92,42 @@ class Thread(models.Model):
         User, on_delete=models.CASCADE, null=True, blank=True, related_name='second_person')
     updated_at = models.DateTimeField(auto_now=True)
     timestamp = models.DateTimeField(auto_now_add=True)
+    unread_messages_count_first = models.IntegerField(default=0)
+    unread_messages_count_second = models.IntegerField(default=0)
+    last_message = models.TextField(blank=True, null=True)
 
     objects = ThreadManager()
 
     class Meta:
         unique_together = ['first_person', 'second_person']
+        
+    def get_other_user(self, user):
+        """Return the other user in the thread"""
+        if user == self.first_person:
+            return self.second_person
+        return self.first_person
+    
+    def mark_as_read(self, user):
+        """Mark all messages as read for the given user"""
+        if user == self.first_person:
+            self.unread_messages_count_first = 0
+        else:
+            self.unread_messages_count_second = 0
+        self.save()
+    
+    def increment_unread(self, user):
+        """Increment unread count for the other user"""
+        if user == self.first_person:
+            self.unread_messages_count_second += 1
+        else:
+            self.unread_messages_count_first += 1
+        self.save()
+    
+    def get_unread_count(self, user):
+        """Get unread count for the given user"""
+        if user == self.first_person:
+            return self.unread_messages_count_first
+        return self.unread_messages_count_second
 
 
 class ChatMessage(models.Model):
@@ -106,9 +137,18 @@ class ChatMessage(models.Model):
         User, on_delete=models.CASCADE, related_name='messages_from')
     message = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+    
+    class Meta:
+        ordering = ['timestamp']
 
     def get_timestamp(self):
         return self.timestamp.strftime('%I:%M %p')
+        
+    def mark_as_read(self):
+        """Mark message as read"""
+        self.is_read = True
+        self.save()
 
     def __str__(self):
         return self.message

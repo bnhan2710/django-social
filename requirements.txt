@@ -29,3 +29,8 @@ django-storages==1.14.2
 # Note: psycopg2-binary is included for potential future PostgreSQL migration
 # Currently using SQLite (built into Django)
 dj-database-url==2.1.0
+
+# WebSockets and Real-time
+channels==4.2.0
+daphne==4.2.0
+channels-redis==4.2.1
