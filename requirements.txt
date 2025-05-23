@@ -1,8 +1,8 @@
 # Web Framework
-Django==4.2.7
+Django>=4.0.4,<4.1
 
 # Image Processing
-Pillow==10.1.0
+Pillow>=9.0.0
 
 # Form Handling and Authentication
 django-crispy-forms==2.0
@@ -13,8 +13,8 @@ django-environ==0.11.2
 python-decouple==3.8
 
 # Static Files and Deployment
-whitenoise==6.6.0
-gunicorn==21.2.0
+whitenoise>=6.0.0
+gunicorn>=20.1.0
 
 # Development Tools
 django-debug-toolbar==4.2.0
@@ -31,6 +31,16 @@ django-storages==1.14.2
 dj-database-url==2.1.0
 
 # WebSockets and Real-time
-channels==4.2.0
-daphne==4.2.0
-channels-redis==4.2.1
+channels>=4.0.0
+daphne>=4.0.0
+channels-redis>=4.0.0
+asgiref>=3.5.0
+redis>=4.3.0
+uvicorn>=0.17.0
+gunicorn>=20.1.0
+django-cors-headers>=3.11.0
+python-dotenv>=0.20.0
+websockets>=10.3
+cryptography>=37.0.0
+service_identity>=21.1.0
+psycopg2-binary>=2.9.3
