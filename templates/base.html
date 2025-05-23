@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
@@ -20,8 +21,777 @@
     <link rel="stylesheet" href="{% static 'assets/css/mdb.min.css' %}" />
     <!-- Custom CSS for UI synchronization -->
     <link rel="stylesheet" href="{% static 'css/ui-sync.css' %}" />
-
     <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4cc9f0;
+            --warning-color: #f72585;
+            --info-color: #7209b7;
+            --border-radius: 10px;
+            --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Poppins', sans-serif;
+            transition: var(--transition);
+        }
+
+        body.dark-mode {
+            background-color: #18191a;
+            color: #e4e6eb;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            transition: var(--transition);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode header {
+            background-color: #242526 !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar {
+            padding: 0.7rem 1rem;
+        }
+
+        .dark-mode .navbar {
+            background-color: #242526 !important;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: black;
+            display: flex;
+            align-items: center;
+        }
+
+        .dark-mode .navbar-brand {
+            color: white;
+        }
+
+        .app-logo {
+            height: 35px;
+            margin-right: 10px;
+            border-radius: 8px;
+        }
+
+        .search-form {
+            position: relative;
+            max-width: 300px;
+        }
+
+        .search-form .form-control {
+            padding-left: 40px;
+            background-color: #f0f2f5;
+            border: none;
+            border-radius: 50px;
+            transition: var(--transition);
+        }
+
+        .dark-mode .search-form .form-control {
+            background-color: #3a3b3c;
+            color: #e4e6eb;
+        }
+
+        .search-form .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #65676b;
+        }
+
+        .dark-mode .search-form .search-icon {
+            color: #b0b3b8;
+        }
+
+        .nav-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: #65676b;
+            transition: var(--transition);
+            margin: 0 5px;
+        }
+
+        .nav-icon:hover {
+            background-color: #f0f2f5;
+            color: var(--primary-color);
+        }
+
+        .dark-mode .nav-icon {
+            color: #b0b3b8;
+        }
+
+        .dark-mode .nav-icon:hover {
+            background-color: #3a3b3c;
+            color: white;
+        }
+
+        .nav-icon.active {
+            color: var(--primary-color);
+        }
+
+        .dark-mode .nav-icon.active {
+            color: var(--success-color);
+        }
+
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--light-color);
+            transition: var(--transition);
+        }
+
+        .profile-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        main {
+            margin-top: 80px;
+            padding: 20px 0;
+        }
+
+        .navigation-tabs {
+            margin-bottom: 25px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            background-color: white;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+
+        .dark-mode .navigation-tabs {
+            background-color: #242526;
+        }
+
+        .nav-pills .nav-link {
+            color: #65676b;
+            font-weight: 500;
+            border-radius: 0;
+            padding: 15px;
+            transition: var(--transition);
+        }
+
+        .dark-mode .nav-pills .nav-link {
+            color: #b0b3b8;
+        }
+
+        .nav-pills .nav-link:hover {
+            background-color: #f0f2f5;
+            color: #1877f2;
+        }
+
+        .dark-mode .nav-pills .nav-link:hover {
+            background-color: #3a3b3c;
+            color: white;
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: transparent;
+            color: var(--primary-color);
+            position: relative;
+        }
+
+        .dark-mode .nav-pills .nav-link.active {
+            color: var(--success-color);
+        }
+
+        .nav-pills .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 3px;
+            background-color: var(--primary-color);
+            border-radius: 10px 10px 0 0;
+        }
+
+        .dark-mode .nav-pills .nav-link.active::after {
+            background-color: var(--success-color);
+        }
+
+        .post-card {
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 25px;
+            transition: var(--transition);
+            background-color: white;
+            border: none;
+        }
+
+        .dark-mode .post-card {
+            background-color: #242526;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .post-header {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #f0f2f5;
+        }
+
+        .dark-mode .post-header {
+            border-bottom: 1px solid #3a3b3c;
+        }
+
+        .post-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
+            border: 2px solid #f0f2f5;
+        }
+
+        .dark-mode .post-avatar {
+            border-color: #3a3b3c;
+        }
+
+        .post-user-info h6 {
+            margin-bottom: 2px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .post-time {
+            font-size: 0.8rem;
+            color: #65676b;
+        }
+
+        .dark-mode .post-time {
+            color: #b0b3b8;
+        }
+
+        .post-options {
+            margin-left: auto;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .post-options:hover {
+            background-color: #f0f2f5;
+        }
+
+        .dark-mode .post-options:hover {
+            background-color: #3a3b3c;
+        }
+
+        .post-image {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .post-image img {
+            width: 100%;
+            transition: var(--transition);
+            object-fit: cover;
+            max-height: 600px;
+        }
+
+        .post-image:hover img {
+            transform: scale(1.02);
+        }
+
+        .post-actions {
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid #f0f2f5;
+            border-bottom: 1px solid #f0f2f5;
+        }
+
+        .dark-mode .post-actions {
+            border-color: #3a3b3c;
+        }
+
+        .action-btn {
+            padding: 8px 15px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            color: #65676b;
+            background-color: transparent;
+            cursor: pointer;
+        }
+
+        .dark-mode .action-btn {
+            color: #b0b3b8;
+        }
+
+        .action-btn i {
+            margin-right: 6px;
+            font-size: 1.1rem;
+        }
+
+        .action-btn:hover {
+            background-color: #f0f2f5;
+        }
+
+        .dark-mode .action-btn:hover {
+            background-color: #3a3b3c;
+        }
+
+        .like-button.liked i {
+            color: #e0245e;
+        }
+
+        .post-content {
+            padding: 15px;
+        }
+
+        .post-caption {
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            word-break: break-word;
+        }
+
+        .dark-mode .post-caption {
+            color: #e4e6eb;
+        }
+
+        .post-likes {
+            font-size: 0.85rem;
+            color: #65676b;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .dark-mode .post-likes {
+            color: #b0b3b8;
+        }
+
+        .comment-section {
+            margin-top: 10px;
+        }
+
+        .comment-item {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .comment-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .comment-bubble {
+            background-color: #f0f2f5;
+            border-radius: 18px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            max-width: calc(100% - 42px);
+        }
+
+        .dark-mode .comment-bubble {
+            background-color: #3a3b3c;
+            color: #e4e6eb;
+        }
+
+        .comment-user {
+            font-weight: 600;
+            margin-right: 5px;
+        }
+
+        .comment-text {
+            word-break: break-word;
+        }
+
+        .comment-meta {
+            font-size: 0.75rem;
+            color: #65676b;
+            margin-top: 3px;
+            margin-left: 12px;
+        }
+
+        .dark-mode .comment-meta {
+            color: #b0b3b8;
+        }
+
+        .view-comments {
+            font-size: 0.85rem;
+            color: #65676b;
+            margin-top: 10px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .dark-mode .view-comments {
+            color: #b0b3b8;
+        }
+
+        .view-comments:hover {
+            text-decoration: underline;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 100px;
+        }
+
+        .sidebar-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+
+        .dark-mode .sidebar-card {
+            background-color: #242526;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .sidebar-header {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #65676b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dark-mode .sidebar-header {
+            color: #e4e6eb;
+        }
+
+        .see-all {
+            font-size: 0.8rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .dark-mode .see-all {
+            color: var(--success-color);
+        }
+
+        .see-all:hover {
+            text-decoration: underline;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            padding: 10px 5px;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+
+        .user-profile:hover {
+            background-color: #f0f2f5;
+        }
+
+        .dark-mode .user-profile:hover {
+            background-color: #3a3b3c;
+        }
+
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+            border: 3px solid #f0f2f5;
+        }
+
+        .dark-mode .user-avatar {
+            border-color: #3a3b3c;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 5px;
+            color: var(--dark-color);
+        }
+
+        .dark-mode .user-name {
+            color: #e4e6eb;
+        }
+
+        .user-bio {
+            font-size: 0.85rem;
+            color: #65676b;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .dark-mode .user-bio {
+            color: #b0b3b8;
+        }
+
+        .suggestions-list {
+            margin-top: 10px;
+        }
+
+        .suggestion-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+
+        .suggestion-item:hover {
+            background-color: #f0f2f5;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        .dark-mode .suggestion-item:hover {
+            background-color: #3a3b3c;
+        }
+
+        .suggestion-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+
+        .suggestion-info {
+            flex: 1;
+        }
+
+        .suggestion-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0;
+            color: var(--dark-color);
+        }
+
+        .dark-mode .suggestion-name {
+            color: #e4e6eb;
+        }
+
+        .suggestion-meta {
+            font-size: 0.75rem;
+            color: #65676b;
+        }
+
+        .dark-mode .suggestion-meta {
+            color: #b0b3b8;
+        }
+
+        .follow-btn {
+            color: var(--primary-color);
+            font-weight: 500;
+            font-size: 0.8rem;
+            margin-left: 10px;
+            padding: 5px 15px;
+            border-radius: 50px;
+            background-color: rgba(67, 97, 238, 0.1);
+            transition: var(--transition);
+        }
+
+        .follow-btn:hover {
+            background-color: rgba(67, 97, 238, 0.2);
+        }
+
+        .dark-mode .follow-btn {
+            color: var(--success-color);
+            background-color: rgba(76, 201, 240, 0.1);
+        }
+
+        .dark-mode .follow-btn:hover {
+            background-color: rgba(76, 201, 240, 0.2);
+        }
+
+        .friends-post-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 15px;
+            transition: var(--transition);
+        }
+
+        .dark-mode .friends-post-card {
+            background-color: #242526;
+        }
+
+        .friends-post-header {
+            padding: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .friends-post-meta {
+            font-size: 0.7rem;
+            color: #65676b;
+            margin-top: 2px;
+        }
+
+        .dark-mode .friends-post-meta {
+            color: #b0b3b8;
+        }
+
+        .friends-post-img {
+            height: 140px;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        .friends-post-footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            align-items: center;
+        }
+
+        .friends-post-stats {
+            font-size: 0.75rem;
+            color: #65676b;
+        }
+
+        .dark-mode .friends-post-stats {
+            color: #b0b3b8;
+        }
+
+        .view-btn {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 50px;
+        }
+
+        .theme-switch {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        .dark-mode .theme-switch {
+            background-color: #3a3b3c;
+        }
+
+        .theme-switch i {
+            font-size: 1.3rem;
+            color: #65676b;
+            transition: var(--transition);
+        }
+
+        .dark-mode .theme-switch i {
+            color: #e4e6eb;
+        }
+
+        /* Animation classes */
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive design */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                position: static;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .nav-icon {
+                width: 35px;
+                height: 35px;
+            }
+            
+            main {
+                margin-top: 70px;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .post-header {
+                padding: 10px;
+            }
+            
+            .post-content {
+                padding: 10px;
+            }
+            
+            .action-btn {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+            
+            .action-btn i {
+                margin-right: 4px;
+            }
+            
+            .nav-pills .nav-link {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+        }
         body {
             margin-bottom: 3rem;
         }
@@ -51,7 +821,7 @@
             padding: 20px 0;
         }
     </style>
-    
+    <link rel="stylesheet" href="{% static 'assets/css/custom.css' %}" />
     {% block extra_css %}{% endblock %}
 </head>
 
@@ -61,21 +831,26 @@
         <i class="fas fa-moon"></i>
     </div>
     
+    <!-- Header -->
     <header>
-        <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-light">
-            <!-- Container wrapper -->
-            <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white">
+            <div class="container gap-3">
                 <!-- Brand -->
                 <a class="navbar-brand" href="/">
-                    <img src="{% static 'assets/images/soundcloud.png' %}" height="30" alt="SoundWave Logo" />
+                    <img src="{% static 'assets/images/soundcloud.png' %}" class="app-logo" alt="Logo" />
                     <span class="d-none d-sm-inline">SoundWave</span>
                 </a>
 
+                <!-- Search form -->
+                <form action="/search" method="POST" class="search-form d-none d-md-block mx-auto">
+                    {% csrf_token %}
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" name="username" class="form-control" placeholder="Search people..." aria-label="Search" />
+                </form>
+
                 <!-- Toggle button -->
-                <button class="navbar-toggler" type="button" data-mdb-toggle="collapse"
-                    data-mdb-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#navbarSupportedContent" 
+                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <i class="fas fa-bars"></i>
                 </button>
 
@@ -89,27 +864,15 @@
                         </form>
                     </div>
                     
-                    <!-- Search form -->
-                    <form action="/search" method="POST" class="search-form d-none d-md-block mx-auto">
-                        {% csrf_token %}
-                        <i class="fas fa-search search-icon"></i>
-                        <input type="text" name="username" class="form-control" placeholder="Search people..." aria-label="Search" />
-                    </form>
-                    
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
                         <!-- Icons -->
                         <li class="nav-item">
-                            <a class="nav-icon {% if request.path == '/' %}active{% endif %}" href="/" title="Home">
+                            <a class="nav-icon active" href="/" title="Home">
                                 <i class="fas fa-home fa-lg"></i>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-icon {% if '/recommendations/' in request.path %}active{% endif %}" href="/recommendations/" title="Discover">
-                                <i class="fas fa-compass fa-lg"></i>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-icon {% if '/messages' in request.path %}active{% endif %}" href="/messages" title="Messages">
+                            <a class="nav-icon" href="/messages" title="Messages">
                                 <i class="fas fa-comment fa-lg"></i>
                             </a>
                         </li>
@@ -123,22 +886,22 @@
                         <li class="nav-item dropdown ms-2">
                             <a class="nav-link dropdown-toggle p-0" id="navbarDropdownMenuLink" role="button"
                                 data-mdb-toggle="dropdown" aria-expanded="false">
-                                <img src="{{main_profile.profile_pic.url}}" class="profile-avatar" alt="Profile" />
+                                <img src="{{user_profile.profile_pic.url}}" class="profile-avatar" alt="Profile" />
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
                                 <li>
-                                    <a class="dropdown-item" href="/profile/{{request.user.username}}">
+                                    <a class="dropdown-item" href="{% url 'profile' pk=request.user.username %}">
                                         <i class="fas fa-user me-2"></i>My Profile
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="/settings">
+                                    <a class="dropdown-item" href="{% url 'settings' %}">
                                         <i class="fas fa-cog me-2"></i>Settings
                                     </a>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <a class="dropdown-item" href="/logout">
+                                    <a class="dropdown-item" href="{% url 'logout' %}">
                                         <i class="fas fa-sign-out-alt me-2"></i>Logout
                                     </a>
                                 </li>
