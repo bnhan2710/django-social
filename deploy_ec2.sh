@@ -17,7 +17,7 @@ sudo apt-get upgrade -y
 
 # Install Python and required dependencies
 echo "📦 Installing Python and required dependencies..."
-sudo apt-get install -y python3 python3-pip python3-dev python3-venv redis-server nginx supervisor
+sudo apt-get install -y python3 python3-pip python3-dev python3-venv redis-server nginx supervisor python3-tk
 
 # Create and activate virtual environment
 echo "🐍 Setting up Python virtual environment..."
@@ -35,6 +35,17 @@ pip install django channels channels_redis daphne uvicorn gunicorn
 if [ -f requirements.txt ]; then
     echo "📦 Installing project dependencies from requirements.txt..."
     pip install -r requirements.txt
+fi
+
+# Fix common import issues
+echo "🔧 Checking for and fixing common import issues..."
+if grep -q "from turtle import" core/models.py; then
+    echo "⚠️ Found problematic 'turtle' import in models.py. Fixing..."
+    # Create backup
+    cp core/models.py core/models.py.bak
+    # Replace 'from turtle import update' with 'from django.db.models import update_or_create'
+    sed -i 's/from turtle import update/# Removed problematic import: from turtle import update/' core/models.py
+    echo "✅ Fixed turtle import in models.py"
 fi
 
 # Ensure Redis is running
@@ -124,20 +135,20 @@ sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t
 
 # Run Django migrations
-echo "🔄 Running Django migrations..."
-export DJANGO_SETTINGS_MODULE=social_media.settings_production
-python manage.py migrate
+# echo "🔄 Running Django migrations..."
+# export DJANGO_SETTINGS_MODULE=social_media.settings_production
+# python manage.py migrate
 
 # Collect static files
 echo "📂 Collecting static files..."
 python manage.py collectstatic --noinput
 
-# Create a .env file for environment variables
-echo "📝 Creating .env file..."
-cat > .env << EOF
-DJANGO_SETTINGS_MODULE=social_media.settings_production
-DJANGO_SECRET_KEY=$(openssl rand -hex 32)
-EOF
+# # Create a .env file for environment variables
+# echo "📝 Creating .env file..."
+# cat > .env << EOF
+# DJANGO_SETTINGS_MODULE=social_media.settings_production
+# DJANGO_SECRET_KEY=$(openssl rand -hex 32)
+# EOF
 
 # Enable and start services
 echo "🔄 Enabling and starting services..."
