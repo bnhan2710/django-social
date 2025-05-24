@@ -212,7 +212,7 @@ def settings(request):
 
         return redirect('settings')
 
-    return render(request, 'settings.html', {'main_profile': main_profile})
+    return render(request, 'settings.html', {'main_profile': main_profile, 'user_profile': main_profile})
 
 
 @login_required(login_url='signin')
@@ -378,6 +378,7 @@ def messages_view(request):
     context = {
         'Threads': threads,
         'main_profile': main_profile,
+        'user_profile': main_profile,
     }
     return render(request, 'message.html', context)
 
